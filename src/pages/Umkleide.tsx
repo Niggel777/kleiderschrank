@@ -1,7 +1,7 @@
 // Umkleide: eigenes Foto + freigestellte Teile darüberlegen, verschieben, skalieren, drehen.
 import { AnimatePresence, motion } from "framer-motion";
 import { useLiveQuery } from "dexie-react-hooks";
-import { ArrowDown, ArrowUp, Camera, Download, FlipHorizontal2, Heart, ImagePlus, Plus, RotateCw, Trash2, Wand2, X } from "lucide-react";
+import { Repeat, Sparkles, ArrowDown, ArrowUp, Camera, Download, FlipHorizontal2, Heart, ImagePlus, Plus, RotateCw, Trash2, Wand2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GarmentImage } from "../components/Garment";
 import { Sheet } from "../components/Sheet";
@@ -16,6 +16,8 @@ import { CATEGORIES, displayName, newId, type CategoryKey, type Item, type Layou
 import { harmony, ordne } from "../lib/outfits";
 import { go } from "../lib/router";
 import { forgetImage, useGarderobe, useImageUrl } from "../lib/store";
+import { kiAnprobe, type KiStatus } from "../lib/kiAnprobe";
+import { konfetti } from "../components/Motion";
 import { EBENE, aufStudioHintergrund, lookRendern, startPosition } from "../lib/umkleide";
 import { PUPPE, koerperPlausibel, platziereAmKoerper, type Koerper } from "../lib/koerper";
 import { erkenneKoerper } from "../lib/pose";
@@ -47,6 +49,10 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
   const [kat, setKat] = useState<CategoryKey | "wunsch">("oberteile");
   const [fotoOffen, setFotoOffen] = useState(false);
   const [speichert, setSpeichert] = useState(false);
+  // KI-Anprobe
+  const [ki, setKi] = useState<{ status: KiStatus | null; url: string | null; blob: Blob | null }>({ status: null, url: null, blob: null });
+  const [zeigeKi, setZeigeKi] = useState(false);
+  const [kiFrage, setKiFrage] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
   const aspect = person?.aspect ?? 900 / 1600;
 
@@ -227,7 +233,7 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
       let basis: Blob;
       if (person) basis = (await bild(person.imageId))!.blob;
       else basis = (await ladePuppe()).blob;
-      const blob = await lookRendern(basis, aspect, sichtbar, byId);
+      const blob = zeigeKi && ki.blob ? ki.blob : await lookRendern(basis, aspect, sichtbar, byId);
       if (alsDatei) {
         download(blob, "look.jpg");
       } else {
@@ -247,6 +253,29 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
       }
     } finally {
       setSpeichert(false);
+    }
+  }
+
+  // Für die KI: oberstes Teil am Oberkörper (Jacke vor Oberteil)
+  const kiTeil = aktuelleTeile.find((i) => i.category === "jacken") ?? aktuelleTeile.find((i) => i.category === "oberteile");
+
+  async function kiStarten() {
+    if (!kiTeil) return;
+    try {
+      const personBlob = person ? (await bild(person.imageId))?.blob : (await ladePuppe()).blob;
+      const kleidId = kiTeil.imageCutout ?? kiTeil.imageOriginal;
+      const kleid = kleidId ? (await bild(kleidId))?.blob : undefined;
+      if (!personBlob || !kleid) throw new Error("Bild fehlt");
+      setKi((k) => ({ ...k, status: { phase: "verbinden" } }));
+      const beschreibung = [kiTeil.colors[0]?.name, kiTeil.sub || "Oberteil"].filter(Boolean).join(" ");
+      const ergebnis = await kiAnprobe(personBlob, kleid, Boolean(kiTeil.imageCutout), beschreibung, (status) => setKi((k) => ({ ...k, status })));
+      if (ki.url) URL.revokeObjectURL(ki.url);
+      setKi({ status: { phase: "fertig" }, url: URL.createObjectURL(ergebnis), blob: ergebnis });
+      setZeigeKi(true);
+      konfetti();
+    } catch (e) {
+      setKi((k) => ({ ...k, status: null }));
+      toast(e instanceof Error ? e.message : "KI-Anprobe fehlgeschlagen");
     }
   }
 
@@ -327,6 +356,23 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
                   );
                 })}
             </>
+            <AnimatePresence>
+              {zeigeKi && ki.url && (
+                <motion.img key={ki.url} className="fitting-ki" src={ki.url} alt="KI-Anprobe" initial={{ opacity: 0, scale: 1.02 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }} />
+              )}
+            </AnimatePresence>
+            {ki.status && ki.status.phase !== "fertig" && (
+              <div className="ki-arbeit">
+                <motion.span className="scan-line" animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }} />
+                <span className="ki-label">
+                  {ki.status.phase === "verbinden"
+                    ? "Verbinde mit der KI …"
+                    : ki.status.phase === "warteschlange"
+                      ? `In der Warteschlange · Platz ${ki.status.position}`
+                      : `KI zieht dich an …${ki.status.eta ? ` ca. ${Math.round(ki.status.eta)} s` : ""}`}
+                </span>
+              </div>
+            )}
             {!sichtbar.length && (
               <div className="fitting-hint">
                 <span>Tippe rechts auf ein Teil, um es anzuziehen</span>
@@ -380,7 +426,21 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
               <Button icon={<Download size={16} />} disabled={!sichtbar.length || speichert} onClick={() => speichern(true)}>
                 Bild
               </Button>
-              {koerper && (
+              <Button
+                variant="primary"
+                icon={<Sparkles size={16} />}
+                disabled={!kiTeil || !person || (ki.status !== null && ki.status.phase !== "fertig")}
+                title={!person ? "Für die KI-Anprobe zuerst ein Foto von dir hochladen" : !kiTeil ? "Ein Oberteil oder eine Jacke anziehen" : undefined}
+                onClick={() => (localStorage.getItem("garderobe.ki.ok") ? kiStarten() : setKiFrage(true))}
+              >
+                KI-Anprobe
+              </Button>
+              {ki.url && (
+                <Button icon={<Repeat size={16} />} onClick={() => setZeigeKi(!zeigeKi)}>
+                  {zeigeKi ? "Zur Collage" : "KI-Bild zeigen"}
+                </Button>
+              )}
+              {koerper && !zeigeKi && (
                 <Button variant="ghost" icon={<Wand2 size={16} />} disabled={!sichtbar.length} onClick={anpassen}>
                   Automatisch anpassen
                 </Button>
@@ -419,6 +479,37 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
       </div>
 
       <FotoSheet open={fotoOffen} onClose={() => setFotoOffen(false)} person={person} />
+      <Sheet
+        open={kiFrage}
+        onClose={() => setKiFrage(false)}
+        title="KI-Anprobe"
+        footer={
+          <div className="row-gap spread">
+            <Button variant="ghost" onClick={() => setKiFrage(false)}>Abbrechen</Button>
+            <Button
+              variant="primary"
+              icon={<Sparkles size={16} />}
+              onClick={() => {
+                localStorage.setItem("garderobe.ki.ok", "1");
+                setKiFrage(false);
+                kiStarten();
+              }}
+            >
+              Verstanden, anprobieren
+            </Button>
+          </div>
+        }
+      >
+        <div className="stack ki-info">
+          <p>Die KI zieht dir das Teil realistisch an – mit Falten, Licht und Passform. Dafür werden <strong>dein Foto und das Kleidungsstück an Hugging Face geschickt</strong> (kostenlose Demo des Modells IDM-VTON).</p>
+          <ul>
+            <li>Funktioniert für <strong>Oberteile und Jacken</strong> – Hosen und Schuhe kann das Modell nicht.</li>
+            <li>Kostenlos, aber mit Warteschlange und Tageskontingent; dauert meist 30–90 Sekunden.</li>
+            <li>Am besten mit eigenem Ganzkörper- oder Oberkörperfoto von vorn.</li>
+            <li>Nur für private Nutzung (Lizenz des Modells).</li>
+          </ul>
+        </div>
+      </Sheet>
     </div>
   );
 }
