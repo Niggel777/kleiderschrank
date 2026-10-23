@@ -2,7 +2,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDownUp, Camera, Check, Search, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { ProductCard } from "../components/Garment";
+import { GarmentImage, ProductCard } from "../components/Garment";
 import { Sheet } from "../components/Sheet";
 import { Button, Chip, Empty, Segmented, Swatch, Toggle } from "../components/ui";
 import { PALETTE } from "../lib/colors";
@@ -202,6 +202,21 @@ export function Schrank({ q }: { q: URLSearchParams }) {
         </Button>
       </div>
 
+      <div className="stories" role="tablist" aria-label="Kategorien">
+        <button className={`story ${kat === "alle" ? "is-on" : ""}`} onClick={() => setKat("alle")}>
+          <span className="story-ring"><span className="story-inner"><span className="story-alle">{vorKategorie.length}</span></span></span>
+          <span>Alle</span>
+        </button>
+        {CATEGORIES.filter((c) => (zaehler.get(c.key) ?? 0) > 0).map((c) => {
+          const titel = vorKategorie.find((i) => i.category === c.key);
+          return (
+            <motion.button key={c.key} className={`story ${kat === c.key ? "is-on" : ""}`} onClick={() => setKat(c.key)} whileTap={{ scale: 0.94 }}>
+              <span className="story-ring"><span className="story-inner">{titel && <GarmentImage item={titel} />}</span></span>
+              <span>{c.label.split(" ")[0]}</span>
+            </motion.button>
+          );
+        })}
+      </div>
       <div className="cat-row scroll-x">
         <Chip on={kat === "alle"} onClick={() => setKat("alle")} count={vorKategorie.length} layoutGroup="kat">
           Alle

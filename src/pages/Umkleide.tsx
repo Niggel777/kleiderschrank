@@ -16,7 +16,7 @@ import { CATEGORIES, displayName, newId, type CategoryKey, type Item, type Layou
 import { harmony, ordne } from "../lib/outfits";
 import { go } from "../lib/router";
 import { forgetImage, useGarderobe, useImageUrl } from "../lib/store";
-import { kiAnprobe, type KiStatus } from "../lib/kiAnprobe";
+import { kiAnprobe, kiReihenfolge, type KiStatus } from "../lib/kiAnprobe";
 import { konfetti } from "../components/Motion";
 import { EBENE, aufStudioHintergrund, lookRendern, startPosition } from "../lib/umkleide";
 import { PUPPE, koerperPlausibel, platziereAmKoerper, type Koerper } from "../lib/koerper";
@@ -256,19 +256,23 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
     }
   }
 
-  // Für die KI: oberstes Teil am Oberkörper (Jacke vor Oberteil)
-  const kiTeil = aktuelleTeile.find((i) => i.category === "jacken") ?? aktuelleTeile.find((i) => i.category === "oberteile");
+  // Für die KI: oben (Jacke vor Oberteil) und unten – oder ein Kleid
+  const kiTeile = kiReihenfolge(aktuelleTeile);
+  const kiTeil = kiTeile[0];
 
   async function kiStarten() {
     if (!kiTeil) return;
     try {
       const personBlob = person ? (await bild(person.imageId))?.blob : (await ladePuppe()).blob;
-      const kleidId = kiTeil.imageCutout ?? kiTeil.imageOriginal;
-      const kleid = kleidId ? (await bild(kleidId))?.blob : undefined;
-      if (!personBlob || !kleid) throw new Error("Bild fehlt");
+      const teile = [];
+      for (const item of kiTeile) {
+        const id = item.imageCutout ?? item.imageOriginal;
+        const b = id ? (await bild(id))?.blob : undefined;
+        if (b) teile.push({ item, bild: b });
+      }
+      if (!personBlob || !teile.length) throw new Error("Bild fehlt");
       setKi((k) => ({ ...k, status: { phase: "verbinden" } }));
-      const beschreibung = [kiTeil.colors[0]?.name, kiTeil.sub || "Oberteil"].filter(Boolean).join(" ");
-      const ergebnis = await kiAnprobe(personBlob, kleid, Boolean(kiTeil.imageCutout), beschreibung, (status) => setKi((k) => ({ ...k, status })));
+      const ergebnis = await kiAnprobe(personBlob, teile, (status) => setKi((k) => ({ ...k, status })));
       if (ki.url) URL.revokeObjectURL(ki.url);
       setKi({ status: { phase: "fertig" }, url: URL.createObjectURL(ergebnis), blob: ergebnis });
       setZeigeKi(true);
@@ -369,7 +373,7 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
                     ? "Verbinde mit der KI …"
                     : ki.status.phase === "warteschlange"
                       ? `In der Warteschlange · Platz ${ki.status.position}`
-                      : `KI zieht dich an …${ki.status.eta ? ` ca. ${Math.round(ki.status.eta)} s` : ""}`}
+                      : `KI zieht dich an${ki.status.schritt ? ` · ${ki.status.schritt}` : ""}${ki.status.eta ? ` · ca. ${Math.round(ki.status.eta)} s` : ""}`}
                 </span>
               </div>
             )}
@@ -430,7 +434,7 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
                 variant="primary"
                 icon={<Sparkles size={16} />}
                 disabled={!kiTeil || !person || (ki.status !== null && ki.status.phase !== "fertig")}
-                title={!person ? "Für die KI-Anprobe zuerst ein Foto von dir hochladen" : !kiTeil ? "Ein Oberteil oder eine Jacke anziehen" : undefined}
+                title={!person ? "Für die KI-Anprobe zuerst ein Foto von dir hochladen" : !kiTeil ? "Ein Oberteil, eine Hose oder ein Kleid anziehen" : `Zieht an: ${kiTeile.map((i) => i.sub || i.name).join(" + ")}`}
                 onClick={() => (localStorage.getItem("garderobe.ki.ok") ? kiStarten() : setKiFrage(true))}
               >
                 KI-Anprobe
@@ -501,12 +505,12 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
         }
       >
         <div className="stack ki-info">
-          <p>Die KI zieht dir das Teil realistisch an – mit Falten, Licht und Passform. Dafür werden <strong>dein Foto und das Kleidungsstück an Hugging Face geschickt</strong> (kostenlose Demo des Modells IDM-VTON).</p>
+          <p>Die KI zieht dir das Teil realistisch an – mit Falten, Licht und Passform. Dafür werden <strong>dein Foto und das Kleidungsstück an Hugging Face geschickt</strong> (kostenlose Demo des Modells Leffa).</p>
           <ul>
-            <li>Funktioniert für <strong>Oberteile und Jacken</strong> – Hosen und Schuhe kann das Modell nicht.</li>
+            <li>Zieht <strong>Oberteil bzw. Jacke und Hose</strong> nacheinander an, oder ein Kleid. Schuhe und Accessoires kann das Modell nicht.</li>
             <li>Kostenlos, aber mit Warteschlange und Tageskontingent; dauert meist 30–90 Sekunden.</li>
             <li>Am besten mit eigenem Ganzkörper- oder Oberkörperfoto von vorn.</li>
-            <li>Nur für private Nutzung (Lizenz des Modells).</li>
+            <li>Das Modell ist frei nutzbar (MIT-Lizenz).</li>
           </ul>
         </div>
       </Sheet>
