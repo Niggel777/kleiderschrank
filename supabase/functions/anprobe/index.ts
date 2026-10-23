@@ -20,6 +20,13 @@ function fehler(status: number, meldung: string) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  // Gesundheitscheck ohne Anmeldung: Ist der Token hinterlegt und gültig? Gibt nur Ja/Nein zurück.
+  if (req.method === "GET") {
+    const t = Deno.env.get("HF_TOKEN");
+    if (!t) return new Response(JSON.stringify({ token: false }), { headers: { ...cors, "Content-Type": "application/json" } });
+    const r = await fetch("https://huggingface.co/api/whoami-v2", { headers: { Authorization: `Bearer ${t}` } });
+    return new Response(JSON.stringify({ token: true, gueltig: r.ok }), { headers: { ...cors, "Content-Type": "application/json" } });
+  }
   if (req.method !== "POST") return fehler(405, "Nur POST");
 
   // Nur echte, angemeldete Nutzer – der öffentliche App-Schlüssel allein reicht nicht
