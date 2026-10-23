@@ -104,3 +104,6 @@
 .more-details summary svg { transition: transform 0.3s var(--ease); color: var(--muted); }
 .more-details[open] summary svg { transform: rotate(180deg); }
 .more-details-body { display: flex; flex-direction: column; gap: 18px; padding: 4px 16px 18px; animation: fadein 0.3s var(--ease); }
+.link-import { display: flex; flex-direction: column; gap: 8px; }
+.link-import .search { padding-right: 5px; height: 46px; }
+.link-import-status { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5; }

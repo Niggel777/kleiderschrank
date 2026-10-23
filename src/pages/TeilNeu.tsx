@@ -1,6 +1,6 @@
 // Teil anlegen oder bearbeiten: Foto → Freistellen → Farben erkennen → Details.
 import { AnimatePresence, m } from "framer-motion";
-import { Camera, Check, ChevronDown, ImagePlus, Plus, RefreshCw, RotateCcw, RotateCw, SlidersHorizontal, Sparkles, Wand2, X } from "lucide-react";
+import { Link2, Camera, Check, ChevronDown, ImagePlus, Plus, RefreshCw, RotateCcw, RotateCw, SlidersHorizontal, Sparkles, Wand2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Overlay } from "../components/Overlay";
 import { useToast } from "../components/Toast";
@@ -14,6 +14,7 @@ import { colorsOf, makeThumb } from "../lib/image";
 import { CATEGORIES, CATEGORY, CONDITIONS, OCCASIONS, SEASONS, SIZES, displayName, emptyItem, type Item } from "../lib/model";
 import { back, go } from "../lib/router";
 import { forgetImage, useGarderobe, useImageUrl } from "../lib/store";
+import { useSync } from "../lib/syncStatus";
 
 type Schritt = "foto" | "arbeit" | "form";
 
@@ -177,6 +178,12 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                   : "Am besten flach auf einem ruhigen Untergrund oder auf dem Bügel vor einer Wand. Der Hintergrund wird direkt auf deinem Gerät entfernt – kein Upload."}
               </p>
             </div>
+            <LinkImport
+              onBild={(blob, info) => {
+                setItem((i) => ({ ...i, name: info.titel ?? i.name, brand: info.marke ?? i.brand, shopUrl: info.url, status: "wish" }));
+                starte(blob);
+              }}
+            />
             <DropZone onFile={starte}>
               <div className="drop-inner">
                 <m.div className="drop-icon" animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
@@ -501,5 +508,57 @@ function DropZone({ onFile, children }: { onFile: (f: File) => void; children: R
     >
       {children}
     </div>
+  );
+}
+
+/** Wunschteil per Shop-Link holen (über die Supabase-Funktion "import"; nur mit Konto). */
+function LinkImport({ onBild }: { onBild: (b: Blob, info: { titel: string | null; marke: string | null; url: string }) => void }) {
+  const [url, setUrl] = useState("");
+  const [status, setStatus] = useState<string | null>(null);
+  const [laedt, setLaedt] = useState(false);
+  const angemeldet = useSync().angemeldet;
+
+  async function holen(e: React.FormEvent) {
+    e.preventDefault();
+    if (!url.trim()) return;
+    setLaedt(true);
+    setStatus(null);
+    try {
+      const { supabase, URL_, KEY } = await import("../lib/sync");
+      const { data } = await supabase.auth.getSession();
+      const r = await fetch(`${URL_}/functions/v1/import`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: KEY, Authorization: `Bearer ${data.session?.access_token ?? KEY}` },
+        body: JSON.stringify({ url: url.trim() }),
+      });
+      const j = (await r.json()) as { fehler?: string; titel?: string; marke?: string; bild?: string };
+      if (!r.ok || !j.bild) {
+        setStatus(
+          r.status === 403 || /\(403\)|nicht geliefert/.test(j.fehler ?? "")
+            ? "Dieser Shop blockiert den Import. Mach einen Screenshot vom Produktbild und füge ihn hier mit Strg + V ein (am Handy: Galerie)."
+            : j.fehler ?? "Import fehlgeschlagen",
+        );
+        return;
+      }
+      const blob = await (await fetch(j.bild)).blob();
+      onBild(blob, { titel: j.titel ?? null, marke: j.marke ?? null, url: url.trim() });
+    } catch {
+      setStatus("Keine Verbindung – bitte später erneut versuchen.");
+    } finally {
+      setLaedt(false);
+    }
+  }
+
+  return (
+    <form className="link-import" onSubmit={holen}>
+      <div className="search">
+        <Link2 size={16} />
+        <input type="url" inputMode="url" placeholder={angemeldet ? "Shop-Link einfügen – Bild & Name werden geholt" : "Shop-Link importieren (mit Konto unter „Mehr“)"} value={url} onChange={(e) => setUrl(e.target.value)} disabled={!angemeldet || laedt} />
+        <button type="submit" className="btn btn-primary btn-s" disabled={!angemeldet || laedt || !url.trim()}>
+          {laedt ? <span className="spinner small" /> : <span>Holen</span>}
+        </button>
+      </div>
+      {status && <p className="link-import-status">{status}</p>}
+    </form>
   );
 }
