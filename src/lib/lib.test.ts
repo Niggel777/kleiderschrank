@@ -166,3 +166,41 @@ describe("Gürtel", () => {
     expect(braun?.harmony.label).toContain("Gürtel passt zu den Schuhen");
   });
 });
+
+describe("Farberkennung mit Schatten", () => {
+  /** Kleidungsstück mit Licht- und Schattenverlauf, transparentem Rand und hellem Saum. */
+  function schattiert(basis: [number, number, number], w = 60, h = 60) {
+    const data = new Uint8ClampedArray(w * h * 4);
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++) {
+        const i = (y * w + x) * 4;
+        const innen = x > 6 && x < w - 6 && y > 6 && y < h - 6;
+        const saum = !innen && x > 4 && x < w - 4 && y > 4 && y < h - 4;
+        const f = 0.55 + 0.75 * (x / w); // Schatten links, Licht rechts
+        if (innen) data.set([basis[0] * f, basis[1] * f, basis[2] * f, 255], i);
+        else if (saum) data.set([230, 230, 230, 180], i); // heller Freistell-Saum
+        else data.set([0, 0, 0, 0], i);
+      }
+    return { data, width: w, height: h };
+  }
+
+  it("erkennt ein schattiertes Navy-Shirt nur als Navy", () => {
+    const f = extractColors(schattiert([30, 42, 70]));
+    expect(f[0].name).toBe("Navy");
+    expect(f.map((c) => c.name)).not.toContain("Schwarz");
+    expect(f.map((c) => c.name)).not.toContain("Weiß");
+  });
+
+  it("erkennt ein schattiertes rotes Shirt als Rot", () => {
+    const f = extractColors(schattiert([183, 49, 46]));
+    expect(f[0].name).toBe("Rot");
+    expect(f).toHaveLength(1);
+  });
+
+  it("trennt weiterhin echte Zweifarbigkeit (Weiß + Navy)", () => {
+    const w = 60, h = 60;
+    const data = new Uint8ClampedArray(w * h * 4);
+    for (let i = 0; i < w * h; i++) data.set(Math.floor(i / w) % 10 < 5 ? [242, 242, 238, 255] : [31, 42, 68, 255], i * 4);
+    expect(extractColors({ data, width: w, height: h }).map((c) => c.name).sort()).toEqual(["Navy", "Weiß"]);
+  });
+});

@@ -507,3 +507,36 @@
 .segmented { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
 .segmented::-webkit-scrollbar { display: none; }
 .segmented button { flex-shrink: 0; }
+
+/* Studio-Look: weicher Lichtkegel von oben und Kontaktschatten unter dem Teil */
+.tile {
+  background:
+    radial-gradient(120% 75% at 50% 18%, color-mix(in srgb, var(--surface) 75%, transparent) 0%, transparent 62%),
+    var(--tile);
+}
+.tile::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 7%;
+  height: 7%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(40, 30, 18, 0.22), transparent);
+  filter: blur(6px);
+  pointer-events: none;
+  z-index: 0;
+}
+.tile:has(.is-photo)::after { display: none; }
+.tile .garment { position: relative; z-index: 1; }
+.garment.is-cut img { image-rendering: auto; }
+.card-media .garment.is-cut { padding: 11% 10% 14%; }
+
+/* Vollbild-Ansicht */
+.lightbox { position: fixed; inset: 0; z-index: 120; background: rgba(12, 11, 9, 0.94); display: grid; place-items: center; touch-action: none; }
+.lightbox-img { max-width: 92vw; max-height: 86vh; cursor: grab; user-select: none; -webkit-user-drag: none; }
+.lightbox-img.is-cut { filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.55)); }
+.lightbox-close { position: absolute; top: calc(14px + env(safe-area-inset-top)); right: 14px; color: #f0ebe2; background: rgba(255, 255, 255, 0.1); }
+.lightbox-close:hover { background: rgba(255, 255, 255, 0.18); color: #fff; }
+.lightbox-hint { position: absolute; bottom: calc(18px + env(safe-area-inset-bottom)); color: rgba(240, 235, 226, 0.6); font-size: 12.5px; }
+.detail-tile { cursor: zoom-in; }

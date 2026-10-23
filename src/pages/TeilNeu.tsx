@@ -1,6 +1,6 @@
 // Teil anlegen oder bearbeiten: Foto → Freistellen → Farben erkennen → Details.
 import { AnimatePresence, motion } from "framer-motion";
-import { Camera, Check, ImagePlus, Plus, RefreshCw, Wand2, X } from "lucide-react";
+import { Camera, Check, ChevronDown, ImagePlus, Plus, RefreshCw, RotateCcw, RotateCw, SlidersHorizontal, Sparkles, Wand2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Overlay } from "../components/Overlay";
 import { useToast } from "../components/Toast";
@@ -9,6 +9,8 @@ import { PALETTE, PALETTE_BY_NAME } from "../lib/colors";
 import { db, putImage, saveItem } from "../lib/db";
 import { isoDay } from "../lib/dates";
 import { verarbeite, type Fortschritt, type VerarbeitetesFoto } from "../lib/freistellen";
+import { STANDARD, bearbeite, type Bearbeitung } from "../lib/bearbeiten";
+import { colorsOf, makeThumb } from "../lib/image";
 import { CATEGORIES, CATEGORY, CONDITIONS, OCCASIONS, SEASONS, SIZES, displayName, emptyItem, type Item } from "../lib/model";
 import { back, go } from "../lib/router";
 import { forgetImage, useGarderobe, useImageUrl } from "../lib/store";
@@ -25,6 +27,44 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
   const [fortschritt, setFortschritt] = useState<Fortschritt | null>(null);
   const [vorschau, setVorschau] = useState<string | null>(null);
   const [ergebnis, setErgebnis] = useState<VerarbeitetesFoto | null>(null);
+  // unbearbeitete Ausgangsbilder + Bearbeitung (drehen, verbessern)
+  const [basis, setBasis] = useState<VerarbeitetesFoto | null>(null);
+  const [bearb, setBearb] = useState<Bearbeitung>(STANDARD);
+  const [regler, setRegler] = useState(false);
+  const [farbenManuell, setFarbenManuell] = useState(false);
+  const [rechnet, setRechnet] = useState(false);
+
+  // Bearbeitung anwenden (kurz verzögert, damit Regler flüssig bleiben)
+  useEffect(() => {
+    if (!basis) return;
+    let aktiv = true;
+    setRechnet(true);
+    const t = setTimeout(async () => {
+      const orig = await bearbeite(basis.original, bearb);
+      const cut = basis.freigestellt ? await bearbeite(basis.freigestellt, bearb) : null;
+      const anzeige = cut ?? orig;
+      const [thumb, farben] = await Promise.all([makeThumb(anzeige.blob), colorsOf(anzeige.blob)]);
+      if (!aktiv) return;
+      setErgebnis({ ...basis, original: orig.blob, freigestellt: cut?.blob ?? null, thumb, farben, aspect: anzeige.width / anzeige.height });
+      setItem((i) => ({ ...i, aspect: anzeige.width / anzeige.height, ...(farbenManuell ? {} : { colors: farben }) }));
+      setRechnet(false);
+    }, 140);
+    return () => {
+      aktiv = false;
+      clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [basis, bearb]);
+
+  async function bildBearbeiten() {
+    // Beim Bearbeiten eines gespeicherten Teils die Bilder aus der Datenbank laden
+    const [o, c] = await Promise.all([item.imageOriginal ? db.images.get(item.imageOriginal) : undefined, item.imageCutout ? db.images.get(item.imageCutout) : undefined]);
+    const original = o?.blob ?? c?.blob;
+    if (!original) return;
+    setFarbenManuell(true);
+    setBearb({ ...STANDARD, auto: false });
+    setBasis({ original, freigestellt: c?.blob ?? null, thumb: original, farben: item.colors, aspect: item.aspect, fehler: null });
+  }
   const [zeigeOriginal, setZeigeOriginal] = useState(false);
   const [speichert, setSpeichert] = useState(false);
   const [farbwahl, setFarbwahl] = useState(false);
@@ -58,6 +98,9 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
     setSchritt("arbeit");
     setFortschritt({ phase: "vorbereiten", anteil: 0 });
     const r = await verarbeite(datei, freistellen, setFortschritt);
+    setFarbenManuell(false);
+    setBearb(STANDARD);
+    setBasis(r);
     setErgebnis(r);
     setItem((i) => ({ ...i, colors: r.farben, aspect: r.aspect }));
     if (r.fehler) toast(r.fehler);
@@ -101,7 +144,8 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
   }
 
   const kategorie = CATEGORY[item.category];
-  const groessen = kategorie.sizes.flatMap((s) => SIZES[s]);
+  // nur das gängigste Größensystem der Kategorie anbieten – andere per Eingabe
+  const groessen = SIZES[kategorie.sizes[0]];
   const set = (p: Partial<Item>) => setItem((i) => ({ ...i, ...p }));
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
@@ -215,6 +259,31 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                   Foto ersetzen
                 </Button>
               </div>
+              {basis ? (
+                <div className="edit-bar">
+                  <button className="icon-btn" aria-label="Nach links drehen" onClick={() => setBearb({ ...bearb, drehung: (bearb.drehung + 270) % 360 })}><RotateCcw size={18} /></button>
+                  <button className="icon-btn" aria-label="Nach rechts drehen" onClick={() => setBearb({ ...bearb, drehung: (bearb.drehung + 90) % 360 })}><RotateCw size={18} /></button>
+                  <button className={`edit-chip ${bearb.auto ? "is-on" : ""}`} onClick={() => setBearb({ ...bearb, auto: !bearb.auto })}>
+                    <Sparkles size={14} /> Verbessern
+                  </button>
+                  <button className={`icon-btn ${regler ? "is-on" : ""}`} aria-label="Helligkeit und Wärme" onClick={() => setRegler(!regler)}><SlidersHorizontal size={18} /></button>
+                  {rechnet && <span className="spinner small" />}
+                </div>
+              ) : (
+                (item.imageOriginal || item.imageCutout) && (
+                  <div className="edit-bar">
+                    <Button size="s" icon={<Wand2 size={14} />} onClick={bildBearbeiten}>Bild drehen & bearbeiten</Button>
+                  </div>
+                )
+              )}
+              <AnimatePresence>
+                {basis && regler && (
+                  <motion.div className="edit-sliders" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+                    <label className="fit-slider"><span>Helligkeit</span><input type="range" min={-1} max={1} step={0.05} value={bearb.helligkeit} onChange={(e) => setBearb({ ...bearb, helligkeit: +e.target.value })} /></label>
+                    <label className="fit-slider"><span>Wärme</span><input type="range" min={-1} max={1} step={0.05} value={bearb.waerme} onChange={(e) => setBearb({ ...bearb, waerme: +e.target.value })} /></label>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <div className="add-fields">
@@ -246,16 +315,6 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                 </div>
               </section>
 
-              <div className="two-col">
-                <Field label="Name">
-                  <input value={item.name} placeholder={displayName({ ...item, name: "" })} onChange={(e) => set({ name: e.target.value })} />
-                </Field>
-                <Field label="Marke">
-                  <input value={item.brand} list="marken" placeholder="z. B. COS" onChange={(e) => set({ brand: e.target.value })} />
-                  <datalist id="marken">{marken.map((m) => <option key={m} value={m} />)}</datalist>
-                </Field>
-              </div>
-
               <section className="form-block">
                 <h3 className="eyebrow">Farben {ergebnis?.farben.length ? <span className="auto-tag">automatisch erkannt</span> : null}</h3>
                 <div className="chip-wrap">
@@ -268,7 +327,7 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         className={`color-chip ${n === 0 ? "is-main" : ""}`}
-                        onClick={() => set({ colors: item.colors.filter((x) => x.name !== c.name) })}
+                        onClick={() => { setFarbenManuell(true); set({ colors: item.colors.filter((x) => x.name !== c.name) }); }}
                         title="Entfernen"
                       >
                         <Swatch name={c.name} size={16} ring /> {c.name}
@@ -292,9 +351,9 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                               key={p.name}
                               className={`swatch-btn ${on ? "is-on" : ""}`}
                               onClick={() =>
-                                set({
+                                (setFarbenManuell(true), set({
                                   colors: on ? item.colors.filter((c) => c.name !== p.name) : [...item.colors, { name: p.name, hex: PALETTE_BY_NAME[p.name].hex, share: 0.2 }].slice(0, 4),
-                                })
+                                }))
                               }
                             >
                               <span className="swatch-big" style={{ background: p.hex }}>{on && <Check size={14} strokeWidth={2.5} />}</span>
@@ -306,7 +365,6 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <Toggle on={item.pattern} onChange={(v) => set({ pattern: v })} label="Gemustert (Streifen, Karo, Print …)" />
               </section>
 
               <section className="form-block">
@@ -321,6 +379,23 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                 </div>
               </section>
 
+              <details className="more-details">
+                <summary>
+                  Mehr Details <span className="muted">Name, Marke, Saison, Anlass … (optional)</span>
+                  <ChevronDown size={16} />
+                </summary>
+                <div className="more-details-body">
+              <div className="two-col">
+                <Field label="Name">
+                  <input value={item.name} placeholder={displayName({ ...item, name: "" })} onChange={(e) => set({ name: e.target.value })} />
+                </Field>
+                <Field label="Marke">
+                  <input value={item.brand} list="marken" placeholder="z. B. COS" onChange={(e) => set({ brand: e.target.value })} />
+                  <datalist id="marken">{marken.map((m) => <option key={m} value={m} />)}</datalist>
+                </Field>
+              </div>
+
+                <Toggle on={item.pattern} onChange={(v) => set({ pattern: v })} label="Gemustert (Streifen, Karo, Print …)" />
               <div className="two-col">
                 {item.status === "wish" ? (
                   <Field label="Link zum Shop">
@@ -367,6 +442,8 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
               <Field label="Notizen">
                 <textarea value={item.notes} placeholder="Passform, Pflegehinweise, Geschenk von …" onChange={(e) => set({ notes: e.target.value })} />
               </Field>
+                </div>
+              </details>
 
               <div className="add-save">
                 {!editId && (

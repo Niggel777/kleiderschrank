@@ -7,6 +7,7 @@ import { Overlay } from "../components/Overlay";
 import { Sheet } from "../components/Sheet";
 import { useToast } from "../components/Toast";
 import { VerkaufSheet } from "../components/VerkaufSheet";
+import { Lightbox } from "../components/Lightbox";
 import { WearStrip } from "../components/WearStrip";
 import { Button, Segmented, Swatch } from "../components/ui";
 import { db, deleteItem, logWear, putImage, saveItem, unlogWear } from "../lib/db";
@@ -44,6 +45,7 @@ function Detail({ item }: { item: Item }) {
   const [loeschen, setLoeschen] = useState(false);
   const [datumOffen, setDatumOffen] = useState(false);
   const [freistellen, setFreistellen] = useState<number | null>(null);
+  const [gross, setGross] = useState(false);
   const heute = stat.last === isoDay();
   const passend = useMemo(() => passendZu(item, items, 8), [item, items]);
   const zeigeOriginal = ansicht === "orig" && item.imageOriginal && item.imageCutout;
@@ -106,7 +108,7 @@ function Detail({ item }: { item: Item }) {
     >
       <div className="detail wrap">
         <div className="detail-media">
-          <motion.div layoutId={`media-${item.id}`} className="tile detail-tile" transition={{ type: "spring", stiffness: 260, damping: 32 }}>
+          <motion.div layoutId={`media-${item.id}`} className="tile detail-tile" transition={{ type: "spring", stiffness: 260, damping: 32 }} onClick={() => freistellen === null && setGross(true)}>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div key={zeigeOriginal ? "o" : "c"} className="detail-img" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
                 {zeigeOriginal ? <OriginalBild id={item.imageOriginal!} /> : <GarmentImage item={item} large />}
@@ -319,6 +321,7 @@ function Detail({ item }: { item: Item }) {
       </div>
 
       <VerkaufSheet item={item} open={verkauf} onClose={() => setVerkauf(false)} />
+      <GrossBild item={item} original={Boolean(zeigeOriginal)} open={gross} onClose={() => setGross(false)} />
       <DatumSheet open={datumOffen} onClose={() => setDatumOffen(false)} onPick={(d) => { setDatumOffen(false); getragen(d); }} />
       <Sheet
         open={loeschen}
@@ -437,4 +440,10 @@ function DatumSheet({ open, onClose, onPick }: { open: boolean; onClose: () => v
       </label>
     </Sheet>
   );
+}
+
+function GrossBild({ item, original, open, onClose }: { item: Item; original: boolean; open: boolean; onClose: () => void }) {
+  const id = original ? item.imageOriginal : item.imageCutout ?? item.imageOriginal ?? item.imageThumb;
+  const url = useImageUrl(id);
+  return <Lightbox src={url} cut={!original && Boolean(item.imageCutout)} open={open} onClose={onClose} />;
 }

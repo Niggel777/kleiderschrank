@@ -91,3 +91,16 @@
   -webkit-backdrop-filter: blur(16px);
 }
 .add-save .btn-primary { flex: 1 1 220px; }
+
+.edit-bar { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; }
+.edit-chip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; font-weight: 520; transition: all 0.2s var(--ease); }
+.edit-chip.is-on { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 6px 16px -8px var(--accent); }
+.edit-sliders { overflow: hidden; display: flex; flex-direction: column; gap: 8px; padding: 10px 6px 0; }
+.edit-sliders input { accent-color: var(--accent); }
+.more-details { border: 1px solid var(--line); border-radius: var(--r-m); background: var(--surface); }
+.more-details summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 14px 16px; font-weight: 540; font-size: 14.5px; }
+.more-details summary::-webkit-details-marker { display: none; }
+.more-details summary .muted { font-weight: 400; font-size: 12.5px; flex: 1; }
+.more-details summary svg { transition: transform 0.3s var(--ease); color: var(--muted); }
+.more-details[open] summary svg { transform: rotate(180deg); }
+.more-details-body { display: flex; flex-direction: column; gap: 18px; padding: 4px 16px 18px; animation: fadein 0.3s var(--ease); }

@@ -168,10 +168,13 @@ export function extractColors(src: PixelSource, maxColors = 3): ColorTag[] {
   const step = Math.max(1, Math.floor(Math.sqrt((width * height) / target)));
   const x0 = hasAlpha ? 0 : Math.floor(width * 0.2), x1 = hasAlpha ? width : Math.ceil(width * 0.8);
   const y0 = hasAlpha ? 0 : Math.floor(height * 0.2), y1 = hasAlpha ? height : Math.ceil(height * 0.8);
+  const deckend = (x: number, y: number) => x < 0 || y < 0 || x >= width || y >= height || data[(y * width + x) * 4 + 3] >= 250;
   for (let y = y0; y < y1; y += step) {
     for (let x = x0; x < x1; x += step) {
       const i = (y * width + x) * 4;
-      if (data[i + 3] < 200) continue;
+      if (data[i + 3] < 250) continue;
+      // Kantenpixel (halbtransparenter Saum vom Freistellen) auslassen
+      if (hasAlpha && !(deckend(x - 2, y) && deckend(x + 2, y) && deckend(x, y - 2) && deckend(x, y + 2))) continue;
       const rgb: RGB = [data[i], data[i + 1], data[i + 2]];
       rgbs.push(rgb);
       samples.push(rgbToLab(rgb));
@@ -180,10 +183,10 @@ export function extractColors(src: PixelSource, maxColors = 3): ColorTag[] {
   if (samples.length === 0) return [];
 
   // k-means, deterministisch initialisiert über gleichmäßig verteilte Stichproben
-  const k = Math.min(5, samples.length);
+  const k = Math.min(6, samples.length);
   let centers: Lab[] = Array.from({ length: k }, (_, i) => samples[Math.floor((i * samples.length) / k)]);
   const assign = new Array<number>(samples.length).fill(0);
-  for (let iter = 0; iter < 12; iter++) {
+  for (let iter = 0; iter < 14; iter++) {
     for (let i = 0; i < samples.length; i++) {
       let best = 0, bestD = Infinity;
       for (let c = 0; c < k; c++) {
@@ -207,25 +210,45 @@ export function extractColors(src: PixelSource, maxColors = 3): ColorTag[] {
     centers = sums.map((s, c) => (s[3] ? [s[0] / s[3], s[1] / s[3], s[2] / s[3]] : centers[c]));
   }
 
-  // Clusterzentren auf Palettennamen abbilden und gleichnamige zusammenfassen
-  const clusterNames = centers.map((z) => nearestPalette(labToRgb(z)).name);
-  const byName = new Map<string, { count: number; r: number; g: number; b: number }>();
+  // Cluster, die sich nur in der Helligkeit unterscheiden (Falten, Schatten, Lichtkanten),
+  // zum größten Cluster derselben Farbe zusammenfassen
+  interface Gruppe { lab: Lab; count: number; r: number; g: number; b: number }
+  const cluster: Gruppe[] = centers.map((lab) => ({ lab, count: 0, r: 0, g: 0, b: 0 }));
   for (let i = 0; i < samples.length; i++) {
-    const name = clusterNames[assign[i]];
-    const e = byName.get(name) ?? { count: 0, r: 0, g: 0, b: 0 };
-    e.count++;
-    e.r += rgbs[i][0];
-    e.g += rgbs[i][1];
-    e.b += rgbs[i][2];
-    byName.set(name, e);
+    const c = cluster[assign[i]];
+    c.count++;
+    c.r += rgbs[i][0];
+    c.g += rgbs[i][1];
+    c.b += rgbs[i][2];
+  }
+  const gruppen: Gruppe[] = [];
+  for (const c of cluster.filter((c) => c.count).sort((a, b) => b.count - a.count)) {
+    const chroma = (l: Lab) => Math.hypot(l[1], l[2]);
+    const ziel = gruppen.find((g) => {
+      const dab = Math.hypot(g.lab[1] - c.lab[1], g.lab[2] - c.lab[2]);
+      const dL = Math.abs(g.lab[0] - c.lab[0]);
+      const neutral = chroma(g.lab) < 10 && chroma(c.lab) < 10;
+      return neutral ? dL < 16 : dab < 12 + Math.min(chroma(g.lab), chroma(c.lab)) * 0.25 && dL < 45;
+    });
+    if (ziel) {
+      ziel.count += c.count;
+      ziel.r += c.r;
+      ziel.g += c.g;
+      ziel.b += c.b;
+    } else gruppen.push({ ...c });
+  }
+
+  // Benennung über die Farbe des dominanten Clusters (nicht über den Mittelwert inkl. Schatten)
+  const byName = new Map<string, { count: number; hex: string }>();
+  for (const g of gruppen) {
+    const name = nearestPalette(labToRgb(g.lab)).name;
+    const e = byName.get(name);
+    if (e) e.count += g.count;
+    else byName.set(name, { count: g.count, hex: rgbToHex([g.r / g.count, g.g / g.count, g.b / g.count]) });
   }
   return [...byName.entries()]
-    .map(([name, e]) => ({
-      name,
-      hex: rgbToHex([e.r / e.count, e.g / e.count, e.b / e.count]),
-      share: e.count / samples.length,
-    }))
-    .filter((c) => c.share >= 0.08)
+    .map(([name, e]) => ({ name, hex: e.hex, share: e.count / samples.length }))
+    .filter((c) => c.share >= 0.1)
     .sort((a, b) => b.share - a.share)
     .slice(0, maxColors);
 }
