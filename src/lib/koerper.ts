@@ -22,19 +22,19 @@ export interface Koerper {
   handR?: Punkt;
 }
 
-/** Körperpunkte der eingebauten Schneiderpuppe (900 × 1600). */
+/** Körperpunkte der eingebauten (männlichen) Schneiderpuppe (900 × 1600). */
 export const PUPPE: Koerper = {
-  nase: { x: 0.5, y: 0.103 },
-  schulterL: { x: 0.656, y: 0.194 },
-  schulterR: { x: 0.344, y: 0.194 },
-  huefteL: { x: 0.633, y: 0.55 },
-  huefteR: { x: 0.367, y: 0.55 },
-  knieL: { x: 0.561, y: 0.781 },
-  knieR: { x: 0.439, y: 0.781 },
-  knoechelL: { x: 0.556, y: 0.9375 },
-  knoechelR: { x: 0.444, y: 0.9375 },
-  handL: { x: 0.728, y: 0.453 },
-  handR: { x: 0.272, y: 0.453 },
+  nase: { x: 0.5, y: 0.1 },
+  schulterL: { x: 0.667, y: 0.192 },
+  schulterR: { x: 0.333, y: 0.192 },
+  huefteL: { x: 0.6, y: 0.56 },
+  huefteR: { x: 0.4, y: 0.56 },
+  knieL: { x: 0.556, y: 0.781 },
+  knieR: { x: 0.444, y: 0.781 },
+  knoechelL: { x: 0.553, y: 0.9375 },
+  knoechelR: { x: 0.447, y: 0.9375 },
+  handL: { x: 0.744, y: 0.475 },
+  handR: { x: 0.256, y: 0.475 },
 };
 
 const mitte = (a: Punkt, b: Punkt): Punkt => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });

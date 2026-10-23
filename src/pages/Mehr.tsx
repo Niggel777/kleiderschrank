@@ -1,7 +1,7 @@
 // Einstellungen, Export (Obsidian, Backup), Beispiel-Schrank, Speicher, Datenschutz.
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion } from "framer-motion";
-import { Archive, CloudSun, Download, FileText, HardDrive, Moon, ShieldCheck, Sparkles, Trash2, Upload } from "lucide-react";
+import { Archive, Shirt, CloudSun, Download, FileText, HardDrive, Moon, ShieldCheck, Sparkles, Trash2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { OrtSheet } from "../components/OrtSheet";
 import { useToast } from "../components/Toast";
@@ -19,7 +19,7 @@ function mb(n: number) {
 }
 
 export function Mehr() {
-  const { items } = useGarderobe();
+  const { items, profil } = useGarderobe();
   const toast = useToast();
   const theme = (useLiveQuery(() => db.settings.get("theme"), [])?.value as string | undefined) ?? "system";
   const ort = useLiveQuery(() => db.settings.get("ort"), [])?.value as Ort | undefined;
@@ -57,6 +57,19 @@ export function Mehr() {
       </header>
 
       <div className="settings">
+        <Gruppe icon={<Shirt size={18} />} titel="Schrank für" text="Bestimmt Kategorien, Unterarten und Größen beim Anlegen und Filtern.">
+          <Segmented
+            id="profil"
+            value={profil}
+            onChange={(v) => setSetting("profil", v)}
+            options={[
+              { value: "herren", label: "Herren" },
+              { value: "damen", label: "Damen" },
+              { value: "alle", label: "Alle" },
+            ]}
+          />
+        </Gruppe>
+
         <Gruppe icon={<Moon size={18} />} titel="Darstellung">
           <Segmented
             id="theme"

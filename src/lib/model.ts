@@ -11,62 +11,107 @@ export interface Category {
   sizes: SizeSystem[];
 }
 
-export const CATEGORIES: Category[] = [
+export type Profil = "herren" | "damen" | "alle";
+
+interface Vorlage {
+  key: CategoryKey;
+  label: Record<Profil, string>;
+  singular: Record<Profil, string>;
+  /** Unterarten: u = für alle, h = Herren, d = Damen */
+  sub: [string, "u" | "h" | "d"][];
+  sizes: SizeSystem[];
+}
+
+const VORLAGEN: Vorlage[] = [
   {
     key: "oberteile",
-    label: "Oberteile",
-    singular: "Oberteil",
-    sub: ["T-Shirt", "Hemd", "Bluse", "Top", "Pullover", "Strickjacke", "Hoodie", "Sweatshirt", "Polo", "Longsleeve"],
+    label: { herren: "Oberteile", damen: "Oberteile", alle: "Oberteile" },
+    singular: { herren: "Oberteil", damen: "Oberteil", alle: "Oberteil" },
+    sub: [["T-Shirt", "u"], ["Hemd", "u"], ["Polo", "u"], ["Longsleeve", "u"], ["Pullover", "u"], ["Strickjacke", "u"], ["Hoodie", "u"], ["Sweatshirt", "u"], ["Overshirt", "h"], ["Tanktop", "h"], ["Bluse", "d"], ["Top", "d"]],
     sizes: ["alpha", "eu"],
   },
   {
     key: "unterteile",
-    label: "Hosen & Röcke",
-    singular: "Hose / Rock",
-    sub: ["Jeans", "Chino", "Stoffhose", "Jogginghose", "Shorts", "Rock", "Leggings", "Cargohose"],
+    label: { herren: "Hosen", damen: "Hosen & Röcke", alle: "Hosen & Röcke" },
+    singular: { herren: "Hose", damen: "Hose / Rock", alle: "Hose / Rock" },
+    sub: [["Jeans", "u"], ["Chino", "u"], ["Stoffhose", "u"], ["Anzughose", "h"], ["Cargohose", "u"], ["Jogginghose", "u"], ["Shorts", "u"], ["Rock", "d"], ["Leggings", "d"]],
     sizes: ["jeans", "alpha", "eu"],
   },
   {
     key: "kleider",
-    label: "Kleider & Overalls",
-    singular: "Kleid / Overall",
-    sub: ["Kleid", "Maxikleid", "Minikleid", "Overall", "Anzug"],
-    sizes: ["alpha", "eu"],
+    label: { herren: "Anzüge & Overalls", damen: "Kleider & Overalls", alle: "Kleider, Anzüge & Overalls" },
+    singular: { herren: "Anzug / Overall", damen: "Kleid / Overall", alle: "Kleid / Anzug" },
+    sub: [["Anzug", "u"], ["Overall", "u"], ["Kleid", "d"], ["Maxikleid", "d"], ["Minikleid", "d"]],
+    sizes: ["eu", "alpha"],
   },
   {
     key: "jacken",
-    label: "Jacken & Mäntel",
-    singular: "Jacke / Mantel",
-    sub: ["Jacke", "Mantel", "Blazer", "Jeansjacke", "Lederjacke", "Daunenjacke", "Weste", "Regenjacke"],
+    label: { herren: "Jacken & Mäntel", damen: "Jacken & Mäntel", alle: "Jacken & Mäntel" },
+    singular: { herren: "Jacke / Mantel", damen: "Jacke / Mantel", alle: "Jacke / Mantel" },
+    sub: [["Jacke", "u"], ["Mantel", "u"], ["Blazer", "u"], ["Jeansjacke", "u"], ["Lederjacke", "u"], ["Bomberjacke", "u"], ["Daunenjacke", "u"], ["Parka", "u"], ["Weste", "u"], ["Regenjacke", "u"]],
     sizes: ["alpha", "eu"],
   },
   {
     key: "schuhe",
-    label: "Schuhe",
-    singular: "Schuhe",
-    sub: ["Sneaker", "Stiefel", "Boots", "Loafer", "Sandalen", "Pumps", "Sportschuhe", "Halbschuhe"],
+    label: { herren: "Schuhe", damen: "Schuhe", alle: "Schuhe" },
+    singular: { herren: "Schuhe", damen: "Schuhe", alle: "Schuhe" },
+    sub: [["Sneaker", "u"], ["Boots", "u"], ["Chelsea Boots", "u"], ["Loafer", "u"], ["Halbschuhe", "u"], ["Sportschuhe", "u"], ["Sandalen", "u"], ["Stiefel", "d"], ["Pumps", "d"]],
     sizes: ["schuhe"],
   },
   {
     key: "accessoires",
-    label: "Accessoires",
-    singular: "Accessoire",
-    sub: ["Tasche", "Rucksack", "Mütze", "Cap", "Schal", "Gürtel", "Sonnenbrille", "Schmuck", "Uhr"],
+    label: { herren: "Accessoires", damen: "Accessoires", alle: "Accessoires" },
+    singular: { herren: "Accessoire", damen: "Accessoire", alle: "Accessoire" },
+    sub: [["Tasche", "u"], ["Rucksack", "u"], ["Mütze", "u"], ["Cap", "u"], ["Schal", "u"], ["Gürtel", "u"], ["Krawatte", "h"], ["Sonnenbrille", "u"], ["Uhr", "u"], ["Schmuck", "u"]],
     sizes: ["onesize", "alpha"],
   },
 ];
 
-export const CATEGORY = Object.fromEntries(CATEGORIES.map((c) => [c.key, c])) as Record<CategoryKey, Category>;
-
-export const SIZES: Record<SizeSystem, string[]> = {
-  alpha: ["XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL"],
-  eu: ["32", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54", "56"],
-  jeans: ["W26", "W27", "W28", "W29", "W30", "W31", "W32", "W33", "W34", "W36", "W38"],
-  schuhe: ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47"],
-  onesize: ["One Size"],
+const EU: Record<Profil, string[]> = {
+  herren: ["44", "46", "48", "50", "52", "54", "56", "58"],
+  damen: ["32", "34", "36", "38", "40", "42", "44", "46"],
+  alle: ["32", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54", "56", "58"],
+};
+const SCHUHE: Record<Profil, string[]> = {
+  herren: ["39", "40", "41", "42", "43", "44", "45", "46", "47", "48"],
+  damen: ["35", "36", "37", "38", "39", "40", "41", "42"],
+  alle: ["35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48"],
+};
+const JEANS: Record<Profil, string[]> = {
+  herren: ["W28", "W29", "W30", "W31", "W32", "W33", "W34", "W36", "W38"],
+  damen: ["W24", "W25", "W26", "W27", "W28", "W29", "W30", "W31", "W32"],
+  alle: ["W24", "W25", "W26", "W27", "W28", "W29", "W30", "W31", "W32", "W33", "W34", "W36", "W38"],
+};
+const ALPHA: Record<Profil, string[]> = {
+  herren: ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+  damen: ["XXS", "XS", "S", "M", "L", "XL", "XXL"],
+  alle: ["XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL"],
 };
 
-const ALPHA_RANK = Object.fromEntries(SIZES.alpha.map((s, i) => [s, i]));
+/*
+ * Kategorien und Größen hängen vom Profil ab (Standard: Herren).
+ * Die Objekte werden beim Profilwechsel in place aktualisiert, damit alle
+ * Stellen, die CATEGORIES/CATEGORY/SIZES lesen, automatisch passen.
+ */
+export const CATEGORIES: Category[] = [];
+export const CATEGORY = {} as Record<CategoryKey, Category>;
+export const SIZES = {} as Record<SizeSystem, string[]>;
+export let PROFIL: Profil = "herren";
+
+export function setProfil(p: Profil): void {
+  PROFIL = p;
+  const passt = (t: "u" | "h" | "d") => p === "alle" || t === "u" || (p === "herren" ? t === "h" : t === "d");
+  CATEGORIES.splice(
+    0,
+    CATEGORIES.length,
+    ...VORLAGEN.map((v) => ({ key: v.key, label: v.label[p], singular: v.singular[p], sub: v.sub.filter(([, t]) => passt(t)).map(([n]) => n), sizes: v.sizes })),
+  );
+  for (const c of CATEGORIES) CATEGORY[c.key] = c;
+  Object.assign(SIZES, { alpha: ALPHA[p], eu: EU[p], jeans: JEANS[p], schuhe: SCHUHE[p], onesize: ["One Size"] });
+}
+setProfil("herren");
+
+const ALPHA_RANK = Object.fromEntries(ALPHA.alle.map((s, i) => [s, i]));
 
 /** Sortierschlüssel für Größen: Buchstabengrößen vor Zahlengrößen, One Size zuletzt. */
 export function sizeRank(size: string): number {

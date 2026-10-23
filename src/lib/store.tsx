@@ -2,7 +2,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { db } from "./db";
-import type { Item, Outfit, Wear } from "./model";
+import { setProfil, type Item, type Outfit, type Profil, type Wear } from "./model";
 import { wearIndex, type WearIndex } from "./stats";
 
 interface Garderobe {
@@ -14,6 +14,7 @@ interface Garderobe {
   wears: Wear[];
   outfits: Outfit[];
   idx: WearIndex;
+  profil: Profil;
 }
 
 const Ctx = createContext<Garderobe | null>(null);
@@ -22,6 +23,10 @@ export function GarderobeProvider({ children }: { children: ReactNode }) {
   const items = useLiveQuery(() => db.items.orderBy("createdAt").reverse().toArray(), []);
   const wears = useLiveQuery(() => db.wears.orderBy("date").toArray(), []);
   const outfits = useLiveQuery(() => db.outfits.orderBy("createdAt").reverse().toArray(), []);
+  const profilSetting = useLiveQuery(() => db.settings.get("profil"), []);
+  const profil = (profilSetting?.value as Profil | undefined) ?? "herren";
+  // Kategorien/Größen vor dem Rendern der Kinder auf das Profil umstellen
+  useMemo(() => setProfil(profil), [profil]);
 
   const value = useMemo<Garderobe>(() => {
     const it = items ?? [];
@@ -33,8 +38,9 @@ export function GarderobeProvider({ children }: { children: ReactNode }) {
       wears: wears ?? [],
       outfits: outfits ?? [],
       idx: wearIndex(wears ?? []),
+      profil,
     };
-  }, [items, wears, outfits]);
+  }, [items, wears, outfits, profil]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
