@@ -1,14 +1,15 @@
 // Teil anlegen oder bearbeiten: Foto → Freistellen → Farben erkennen → Details.
 import { AnimatePresence, m } from "framer-motion";
 import { Link2, Camera, Check, ChevronDown, ImagePlus, Plus, RefreshCw, RotateCcw, RotateCw, SlidersHorizontal, Sparkles, Wand2, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Kamera } from "../components/Kamera";
 import { Overlay } from "../components/Overlay";
 import { useToast } from "../components/Toast";
 import { Button, Chip, Field, Segmented, Swatch, Toggle } from "../components/ui";
 import { PALETTE, PALETTE_BY_NAME } from "../lib/colors";
 import { db, putImage, saveItem, bild } from "../lib/db";
 import { isoDay } from "../lib/dates";
-import { verarbeite, type Fortschritt, type VerarbeitetesFoto } from "../lib/freistellen";
+import { freistellenVorladen, verarbeite, type Fortschritt, type VerarbeitetesFoto } from "../lib/freistellen";
 import { STANDARD, bearbeite, type Bearbeitung } from "../lib/bearbeiten";
 import { colorsOf, makeThumb } from "../lib/image";
 import { CATEGORIES, CATEGORY, CONDITIONS, OCCASIONS, SEASONS, SIZES, displayName, emptyItem, type Item } from "../lib/model";
@@ -70,6 +71,12 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
   const [speichert, setSpeichert] = useState(false);
   const [farbwahl, setFarbwahl] = useState(false);
   const kamera = useRef<HTMLInputElement>(null);
+  const [liveKamera, setLiveKamera] = useState(false);
+  // Ohne Kamera-Zugriff (z. B. abgelehnt) auf die Kamera-App des Systems ausweichen
+  const keineLiveKamera = useCallback(() => {
+    setLiveKamera(false);
+    kamera.current?.click();
+  }, []);
   const galerie = useRef<HTMLInputElement>(null);
 
   // Beim Bearbeiten: Daten nachladen, sobald die Datenbank bereit ist
@@ -92,6 +99,10 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
   });
 
   const cutUrl = useMemo(() => (ergebnis?.freigestellt ? URL.createObjectURL(ergebnis.freigestellt) : null), [ergebnis]);
+  // Freistell-Modell laden, während der Nutzer noch fotografiert
+  useEffect(() => {
+    if (!editId) freistellenVorladen();
+  }, [editId]);
   const marken = useMemo(() => [...new Set(items.map((i) => i.brand).filter(Boolean))].sort(), [items]);
 
   async function starte(datei: File | Blob) {
@@ -159,6 +170,21 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
     <Overlay title={editId ? "Bearbeiten" : item.status === "wish" ? "Neuer Wunsch" : "Neues Teil"} className="add-overlay">
       <input ref={kamera} type="file" accept="image/*" capture="environment" hidden onChange={(e) => e.target.files?.[0] && starte(e.target.files[0])} />
       <input ref={galerie} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && starte(e.target.files[0])} />
+      <Kamera
+        kategorie={item.category}
+        offen={liveKamera}
+        onKategorie={(k) => set({ category: k, sub: "", size: k === item.category ? item.size : "" })}
+        onFoto={(b) => {
+          setLiveKamera(false);
+          starte(b);
+        }}
+        onGalerie={() => {
+          setLiveKamera(false);
+          galerie.current?.click();
+        }}
+        onNichtVerfuegbar={keineLiveKamera}
+        onClose={() => setLiveKamera(false)}
+      />
 
       <>
         {schritt === "foto" && (
@@ -193,7 +219,7 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                   <Camera size={28} strokeWidth={1.5} />
                 </m.div>
                 <div className="drop-actions">
-                  <Button variant="primary" size="l" icon={<Camera size={18} />} onClick={() => kamera.current?.click()}>
+                  <Button variant="primary" size="l" icon={<Camera size={18} />} onClick={() => setLiveKamera(true)}>
                     Foto aufnehmen
                   </Button>
                   <Button size="l" icon={<ImagePlus size={18} />} onClick={() => galerie.current?.click()}>

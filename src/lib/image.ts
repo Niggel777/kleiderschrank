@@ -1,6 +1,7 @@
 // Bildverarbeitung im Browser: verkleinern, freistellen zuschneiden, Vorschaubilder.
 import { extractColors } from "./colors";
 import type { ColorTag } from "./model";
+import { entferneInseln, fuelleLoecher, neigung, saeubereKanten } from "./packshot";
 
 let webpOk: boolean | null = null;
 
@@ -57,6 +58,35 @@ export async function normalizePhoto(file: Blob, max = 1600): Promise<{ blob: Bl
   c.getContext("2d")!.drawImage(bmp, 0, 0, w, h);
   bmp.close();
   return { blob: await toBlob(c, "image/jpeg", 0.88), width: w, height: h };
+}
+
+/**
+ * Freisteller wie ein Shop-Packshot aufbereiten: Fussel/Bodenreste weg, kleine Löcher zu,
+ * saubere Kanten ohne Saum vom alten Untergrund, leicht schief fotografierte Teile gerade.
+ */
+export async function packshotAufbereiten(src: Blob): Promise<Blob> {
+  const bmp = await loadBitmap(src);
+  const c = canvas(bmp.width, bmp.height);
+  const ctx = c.getContext("2d", { willReadFrequently: true })!;
+  ctx.drawImage(bmp, 0, 0);
+  bmp.close();
+  const bild = ctx.getImageData(0, 0, c.width, c.height);
+  entferneInseln(bild);
+  fuelleLoecher(bild);
+  saeubereKanten(bild);
+  ctx.putImageData(bild, 0, 0);
+  const grad = neigung(bild);
+  if (!grad) return alphaBlob(c);
+  // Gerade drehen: Zeichenfläche so groß, dass nichts abgeschnitten wird
+  const rad = (-grad * Math.PI) / 180;
+  const cos = Math.abs(Math.cos(rad)), sin = Math.abs(Math.sin(rad));
+  const out = canvas(c.width * cos + c.height * sin, c.width * sin + c.height * cos);
+  const o = out.getContext("2d")!;
+  o.imageSmoothingQuality = "high";
+  o.translate(out.width / 2, out.height / 2);
+  o.rotate(rad);
+  o.drawImage(c, -c.width / 2, -c.height / 2);
+  return alphaBlob(out);
 }
 
 /** Schneidet transparente Ränder ab und lässt einen kleinen Rand stehen. */
