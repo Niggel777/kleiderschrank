@@ -1,16 +1,37 @@
 // Darstellung eines Kleidungsstücks: freigestellt mit weichem Schatten oder als Foto.
 import { m } from "framer-motion";
 import { Heart, Check } from "lucide-react";
-import { forwardRef, memo } from "react";
+import { forwardRef, memo, useEffect, useRef, useState } from "react";
 import { relativeDay } from "../lib/dates";
 import { db, logWear } from "../lib/db";
 import { isoDay } from "../lib/dates";
 import { displayName, type Item } from "../lib/model";
-import { displayImageId, useImageUrl } from "../lib/store";
+import { displayImageId, imageUrl, useImageUrl } from "../lib/store";
 import { idleDays, type WearStat } from "../lib/stats";
 import { useToast } from "./Toast";
 import { Swatch } from "./ui";
 import { Tilt } from "./Motion";
+
+// Bilder erst laden, wenn sie in die Nähe des sichtbaren Bereichs kommen (spart Arbeit bei großen Schränken)
+const sichtbarSchon = new Set<string>();
+let beobachter: IntersectionObserver | null = null;
+const rueckrufe = new WeakMap<Element, () => void>();
+function beobachte(el: Element, f: () => void) {
+  if (typeof IntersectionObserver === "undefined") return f();
+  beobachter ??= new IntersectionObserver(
+    (eintraege) => {
+      for (const e of eintraege) {
+        if (!e.isIntersecting) continue;
+        rueckrufe.get(e.target)?.();
+        beobachter!.unobserve(e.target);
+        rueckrufe.delete(e.target);
+      }
+    },
+    { rootMargin: "600px 0px" },
+  );
+  rueckrufe.set(el, f);
+  beobachter.observe(el);
+}
 
 export const GarmentImage = memo(function GarmentImage({
   item,
@@ -23,18 +44,38 @@ export const GarmentImage = memo(function GarmentImage({
   className?: string;
   fit?: "contain" | "cover";
 }) {
-  const url = useImageUrl(displayImageId(item, large));
+  const bildId = displayImageId(item, large);
+  const ref = useRef<HTMLDivElement>(null);
+  const [sichtbar, setSichtbar] = useState(() => large || (bildId ? sichtbarSchon.has(bildId) : false));
+  useEffect(() => {
+    if (sichtbar || !ref.current) return;
+    beobachte(ref.current, () => {
+      if (bildId) sichtbarSchon.add(bildId);
+      setSichtbar(true);
+    });
+    const el = ref.current;
+    // Absicherung: falls der Beobachter nicht feuert (z. B. Hintergrund-Tab), trotzdem laden
+    const t = window.setTimeout(() => setSichtbar(true), 2500);
+    return () => {
+      window.clearTimeout(t);
+      beobachter?.unobserve(el);
+      rueckrufe.delete(el);
+    };
+  }, [sichtbar, bildId]);
+  const url = useImageUrl(sichtbar ? bildId : null);
   const cut = Boolean(item.imageCutout);
   return (
-    <div className={`garment ${cut ? "is-cut" : "is-photo"} fit-${fit} ${className}`}>
+    <div ref={ref} className={`garment ${cut ? "is-cut" : "is-photo"} fit-${fit} ${className}`}>
       {url ? (
         <m.img
           src={url}
           alt={displayName(item)}
           draggable={false}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.35 }}
+          decoding="async"
+          initial={sichtbarSchon.has(`fade:${bildId}`) ? false : { opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          onAnimationComplete={() => sichtbarSchon.add(`fade:${bildId}`)}
         />
       ) : (
         <span className="garment-placeholder" />
@@ -79,6 +120,10 @@ export const ProductCard = forwardRef<HTMLElement, {
       <a
         href={`#/teil/${item.id}`}
         className="card-media"
+        onPointerEnter={() => {
+          const gross = displayImageId(item, true);
+          if (gross) imageUrl(gross);
+        }}
         onClick={(e) => {
           if (onOpen) {
             e.preventDefault();

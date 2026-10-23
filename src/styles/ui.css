@@ -541,3 +541,5 @@
 .lightbox-hint { position: absolute; bottom: calc(18px + env(safe-area-inset-bottom)); color: rgba(240, 235, 226, 0.6); font-size: 12.5px; }
 .detail-tile { cursor: zoom-in; }
 .seite-laedt { min-height: 50vh; display: grid; place-items: center; }
+/* Karten außerhalb des Bildschirms nicht rendern – flüssiges Scrollen auch bei vielen Teilen */
+.grid > .card { content-visibility: auto; contain-intrinsic-size: auto 340px; }
