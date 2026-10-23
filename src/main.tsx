@@ -16,6 +16,7 @@ import "./styles/heute.css";
 import "./styles/swipe.css";
 import "./styles/shop.css";
 import "./styles/luxe.css";
+import "./styles/neon.css";
 import { App } from "./App";
 import { installRouter } from "./lib/router";
 import { startSmoothScroll } from "./components/Motion";

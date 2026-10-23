@@ -102,7 +102,7 @@ export function Heute() {
             {formatWeekday(heute)}
           </motion.div>
           <motion.h1 className="display heute-title" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
-            {gruss()}<em>.</em>
+            {gruss()}<em> 👋</em>
           </motion.h1>
           <motion.button className="weather-chip big" onClick={() => setOrtOffen(true)} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <CloudSun size={18} strokeWidth={1.6} />
@@ -131,7 +131,7 @@ export function Heute() {
           </div>
           <div className="ootd-side">
             <div className="eyebrow">{heuteGetragen.length ? "Dein Look heute" : "Outfit des Tages"}</div>
-            <h2 className="display ootd-title">{heuteGetragen.length ? <>Gut <em>angezogen.</em></> : <>Was ziehst du <em>heute</em> an?</>}</h2>
+            <h2 className="display ootd-title">{heuteGetragen.length ? <>Gut <em>angezogen</em></> : <>Dein Look für <em>heute</em></>}</h2>
             {!heuteGetragen.length && h && <p className="muted ootd-sub">{h.label}{temp !== null ? ` · passend zu ${temp}°` : ""}</p>}
             <ul className="ootd-list">
               {(heuteGetragen.length ? heuteGetragen : vorschlag?.items ?? []).map((i, n) => (

@@ -2,3 +2,4 @@ node_modules
 dist
 .env.supabase.local
 supabase/.temp
+privat/
