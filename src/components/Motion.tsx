@@ -1,7 +1,7 @@
 // Bewegung: weiches Scrollen, 3D-Neigung, hochzählende Zahlen, Konfetti.
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
-import { animate, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { animate, m, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 let lenis: Lenis | null = null;
@@ -43,7 +43,7 @@ export function Tilt({ children, staerke = 7, className = "" }: { children: Reac
   const hover = typeof matchMedia !== "undefined" && matchMedia("(hover: hover)").matches;
   if (!hover) return <div className={className}>{children}</div>;
   return (
-    <motion.div
+    <m.div
       className={`tilt ${className}`}
       style={{ rotateX: rx, rotateY: ry, transformPerspective: 900 }}
       onPointerMove={(e) => {
@@ -57,7 +57,7 @@ export function Tilt({ children, staerke = 7, className = "" }: { children: Reac
       }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 

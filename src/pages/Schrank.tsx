@@ -1,5 +1,5 @@
 // Der Schrank als Shop: Kategorien, Suche, Filter, Sortierung.
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { ArrowDownUp, Camera, Check, Search, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { GarmentImage, ProductCard } from "../components/Garment";
@@ -11,7 +11,6 @@ import { CATEGORIES, CATEGORY, OCCASIONS, SEASONS, sizeRank, type CategoryKey, t
 import { go } from "../lib/router";
 import { SORT_LABEL, idleDays, sortItems, statOf, type SortKey } from "../lib/stats";
 import { useGarderobe } from "../lib/store";
-import { ladeDemo } from "../demo/seed";
 import { useToast } from "../components/Toast";
 
 type Bereich = "schrank" | "wunsch" | "verkauf";
@@ -99,9 +98,9 @@ export function Schrank({ q }: { q: URLSearchParams }) {
     return (
       <div className="wrap">
         <div className="hero-empty">
-          <motion.div className="hero-empty-art" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
+          <m.div className="hero-empty-art" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
             <HangerArt />
-          </motion.div>
+          </m.div>
           <Empty
             title={
               <>
@@ -120,6 +119,7 @@ export function Schrank({ q }: { q: URLSearchParams }) {
                   disabled={demoLaedt !== null}
                   onClick={async () => {
                     setDemoLaedt("");
+                    const { ladeDemo } = await import("../demo/seed");
                     await ladeDemo((n, von) => setDemoLaedt(`${n}/${von}`));
                     setDemoLaedt(null);
                     toast("Beispiel-Schrank geladen – du kannst ihn unter Einstellungen wieder entfernen");
@@ -210,10 +210,10 @@ export function Schrank({ q }: { q: URLSearchParams }) {
         {CATEGORIES.filter((c) => (zaehler.get(c.key) ?? 0) > 0).map((c) => {
           const titel = vorKategorie.find((i) => i.category === c.key);
           return (
-            <motion.button key={c.key} className={`story ${kat === c.key ? "is-on" : ""}`} onClick={() => setKat(c.key)} whileTap={{ scale: 0.94 }}>
+            <m.button key={c.key} className={`story ${kat === c.key ? "is-on" : ""}`} onClick={() => setKat(c.key)} whileTap={{ scale: 0.94 }}>
               <span className="story-ring"><span className="story-inner">{titel && <GarmentImage item={titel} />}</span></span>
               <span>{c.label.split(" ")[0]}</span>
-            </motion.button>
+            </m.button>
           );
         })}
       </div>
@@ -230,7 +230,7 @@ export function Schrank({ q }: { q: URLSearchParams }) {
 
       <AnimatePresence initial={false}>
         {aktiveFilter > 0 && (
-          <motion.div className="active-filters" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+          <m.div className="active-filters" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
             <div className="active-filters-inner">
               {filter.farben.map((f) => (
                 <button key={f} className="pill" onClick={() => setFilter({ ...filter, farben: toggle(filter.farben, f) })}>
@@ -277,7 +277,7 @@ export function Schrank({ q }: { q: URLSearchParams }) {
                 Alle zurücksetzen
               </button>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -304,13 +304,13 @@ export function Schrank({ q }: { q: URLSearchParams }) {
           }
         />
       ) : (
-        <motion.div className="grid" layout>
+        <m.div className="grid" layout>
           <AnimatePresence mode="popLayout">
             {sichtbar.map((item, n) => (
               <ProductCard key={item.id} item={item} stat={statOf(idx, item.id)} index={n} />
             ))}
           </AnimatePresence>
-        </motion.div>
+        </m.div>
       )}
 
       <Sheet
@@ -419,7 +419,7 @@ export function Schrank({ q }: { q: URLSearchParams }) {
 export function HangerArt() {
   return (
     <svg viewBox="0 0 320 220" className="hanger-art" aria-hidden>
-      <motion.path
+      <m.path
         d="M160 40c0-12 10-20 21-18 10 2 16 12 13 22-2 7-9 11-16 13l-18 5v8L28 150c-9 5-6 18 4 18h256c10 0 13-13 4-18L160 70"
         fill="none"
         stroke="currentColor"

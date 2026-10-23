@@ -1,5 +1,5 @@
 // Darstellung eines Kleidungsstücks: freigestellt mit weichem Schatten oder als Foto.
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Heart, Check } from "lucide-react";
 import { forwardRef, memo } from "react";
 import { relativeDay } from "../lib/dates";
@@ -28,7 +28,7 @@ export const GarmentImage = memo(function GarmentImage({
   return (
     <div className={`garment ${cut ? "is-cut" : "is-photo"} fit-${fit} ${className}`}>
       {url ? (
-        <motion.img
+        <m.img
           src={url}
           alt={displayName(item)}
           draggable={false}
@@ -67,7 +67,7 @@ export const ProductCard = forwardRef<HTMLElement, {
   }
 
   return (
-    <motion.article
+    <m.article
       ref={ref}
       className="card"
       layout="position"
@@ -87,9 +87,9 @@ export const ProductCard = forwardRef<HTMLElement, {
         }}
       >
         <Tilt>
-          <motion.div layoutId={`media-${item.id}`} className="tile" transition={{ type: "spring", stiffness: 260, damping: 32 }}>
+          <m.div layoutId={`media-${item.id}`} className="tile" transition={{ type: "spring", stiffness: 260, damping: 32 }}>
             <GarmentImage item={item} />
-          </motion.div>
+          </m.div>
         </Tilt>
         <div className="card-badges">
           {item.status === "wish" && <span className="badge">Wunsch</span>}
@@ -125,6 +125,6 @@ export const ProductCard = forwardRef<HTMLElement, {
           <span>{item.status === "wish" ? "Wunschliste" : stat.count ? relativeDay(stat.last) : "noch nie getragen"}</span>
         </div>
       </a>
-    </motion.article>
+    </m.article>
   );
 });

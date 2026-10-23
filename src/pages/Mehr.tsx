@@ -1,6 +1,6 @@
 // Einstellungen, Export (Obsidian, Backup), Beispiel-Schrank, Speicher, Datenschutz.
 import { useLiveQuery } from "dexie-react-hooks";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Archive, Cloud, Shirt, CloudSun, Download, FileText, HardDrive, Moon, ShieldCheck, Sparkles, Trash2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { OrtSheet } from "../components/OrtSheet";
@@ -152,7 +152,7 @@ export function Mehr() {
         <Gruppe icon={<HardDrive size={18} />} titel="Speicher" text={speicher ? `${mb(speicher.used)} belegt von ${mb(speicher.quota)} verfügbar` : "Speicherbelegung nicht verfügbar"}>
           {speicher && (
             <div className="storage-bar">
-              <motion.span initial={{ width: 0 }} animate={{ width: `${Math.max(1.5, (speicher.used / Math.max(1, speicher.quota)) * 100)}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} />
+              <m.span initial={{ width: 0 }} animate={{ width: `${Math.max(1.5, (speicher.used / Math.max(1, speicher.quota)) * 100)}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} />
             </div>
           )}
         </Gruppe>
@@ -161,9 +161,9 @@ export function Mehr() {
       </div>
 
       {arbeit && (
-        <motion.div className="busy" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <m.div className="busy" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <span className="spinner" /> {arbeit}
-        </motion.div>
+        </m.div>
       )}
       <p className="colophon muted">Garderobe · gebaut mit Claude · Freistellen: @imgly/background-removal (AGPL)</p>
       <OrtSheet open={ortOffen} onClose={() => setOrtOffen(false)} />
@@ -173,13 +173,13 @@ export function Mehr() {
 
 function Gruppe({ icon, titel, text, children }: { icon: React.ReactNode; titel: string; text?: string; children?: React.ReactNode }) {
   return (
-    <motion.section className="setting" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
+    <m.section className="setting" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
       <span className="setting-icon">{icon}</span>
       <div className="setting-main">
         <h2>{titel}</h2>
         {text && <p>{text}</p>}
         {children && <div className="setting-ctrl">{children}</div>}
       </div>
-    </motion.section>
+    </m.section>
   );
 }

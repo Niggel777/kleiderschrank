@@ -1,5 +1,5 @@
 // Umkleide: eigenes Foto + freigestellte Teile darüberlegen, verschieben, skalieren, drehen.
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Repeat, Sparkles, ArrowDown, ArrowUp, Camera, Download, FlipHorizontal2, Heart, ImagePlus, Plus, RotateCw, Trash2, Wand2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -348,26 +348,26 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
                       }}
                       onPointerDown={(e) => onPieceDown(e, p.itemId)}
                     >
-                      <motion.div
+                      <m.div
                         className="fit-piece-inner"
                         initial={{ opacity: 0, scale: 0.8, y: -12 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         transition={{ type: "spring", stiffness: 300, damping: 24 }}
                       >
                         <GarmentImage item={it} large />
-                      </motion.div>
+                      </m.div>
                     </div>
                   );
                 })}
             </>
             <AnimatePresence>
               {zeigeKi && ki.url && (
-                <motion.img key={ki.url} className="fitting-ki" src={ki.url} alt="KI-Anprobe" initial={{ opacity: 0, scale: 1.02 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }} />
+                <m.img key={ki.url} className="fitting-ki" src={ki.url} alt="KI-Anprobe" initial={{ opacity: 0, scale: 1.02 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }} />
               )}
             </AnimatePresence>
             {ki.status && ki.status.phase !== "fertig" && (
               <div className="ki-arbeit">
-                <motion.span className="scan-line" animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }} />
+                <m.span className="scan-line" animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }} />
                 <span className="ki-label">
                   {ki.status.phase === "verbinden"
                     ? "Verbinde mit der KI …"
@@ -386,7 +386,7 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
 
           <AnimatePresence>
             {auswahl && (
-              <motion.div className="fit-tools" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ type: "spring", stiffness: 400, damping: 32 }}>
+              <m.div className="fit-tools" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ type: "spring", stiffness: 400, damping: 32 }}>
                 <label className="fit-slider">
                   <span>Größe</span>
                   <input type="range" min={0.05} max={1.4} step={0.005} value={auswahl.w} onChange={(e) => aendere(auswahl.itemId, { w: +e.target.value })} />
@@ -401,7 +401,7 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
                   <button className="icon-btn" aria-label="Spiegeln" onClick={() => aendere(auswahl.itemId, { flip: !auswahl.flip })}><FlipHorizontal2 size={16} /></button>
                   <button className="icon-btn" aria-label="Ausziehen" onClick={() => { setPieces(pieces.filter((p) => p.itemId !== auswahl.itemId)); setSel(null); }}><Trash2 size={16} /></button>
                 </div>
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
         </div>
@@ -467,10 +467,10 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
               {drawer.map((it) => {
                 const an = pieces.some((p) => p.itemId === it.id);
                 return (
-                  <motion.button key={it.id} layout className={`drawer-item ${an ? "is-on" : ""}`} onClick={() => anziehen(it)} title={displayName(it)} whileTap={{ scale: 0.94 }}>
+                  <m.button key={it.id} layout className={`drawer-item ${an ? "is-on" : ""}`} onClick={() => anziehen(it)} title={displayName(it)} whileTap={{ scale: 0.94 }}>
                     <GarmentImage item={it} />
                     {an && <span className="build-check"><X size={11} strokeWidth={3} /></span>}
-                  </motion.button>
+                  </m.button>
                 );
               })}
               <button className="drawer-item drawer-add" onClick={() => go(kat === "wunsch" ? "neu?status=wish" : `neu?kat=${kat}`)}>

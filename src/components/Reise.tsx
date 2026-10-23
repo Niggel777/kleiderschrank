@@ -1,6 +1,6 @@
 // Koffer packen: Outfits pro Reisetag (nach Wettervorhersage) und daraus eine Packliste,
 // die möglichst wenige Teile möglichst oft kombiniert.
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { Check, Luggage, MapPin, RotateCcw, Search } from "lucide-react";
 import { useState } from "react";
 import { addDays, formatDayShort, isoDay } from "../lib/dates";
@@ -70,7 +70,7 @@ export function Reise() {
           <Button variant="ghost" icon={<RotateCcw size={16} />} onClick={() => setPlan(null)}>Neue Reise</Button>
         </div>
         <div className="pack-progress">
-          <motion.span initial={{ width: 0 }} animate={{ width: `${(fertig / Math.max(1, alle.length)) * 100}%` }} transition={{ type: "spring", stiffness: 120, damping: 20 }} />
+          <m.span initial={{ width: 0 }} animate={{ width: `${(fertig / Math.max(1, alle.length)) * 100}%` }} transition={{ type: "spring", stiffness: 120, damping: 20 }} />
         </div>
         <p className="muted pack-count tabular">{fertig} von {alle.length} gepackt</p>
 
@@ -100,7 +100,7 @@ export function Reise() {
           </section>
           <section className="reise-tage">
             {plan.tage.map((t, n) => (
-              <motion.div key={t.datum} className="reise-tag" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: n * 0.06 }}>
+              <m.div key={t.datum} className="reise-tag" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: n * 0.06 }}>
                 <div className="reise-tag-head">
                   <strong>{new Intl.DateTimeFormat("de-DE", { weekday: "short", day: "numeric", month: "short" }).format(new Date(t.datum))}</strong>
                   <span className="muted">{t.wetter ? `${t.wetter.min}–${t.wetter.max}° · ${wetterText(t.wetter.code)}` : "kein Wetter"}</span>
@@ -108,7 +108,7 @@ export function Reise() {
                 <div className="reise-board">
                   <Collage items={t.itemIds.map((id) => byId.get(id)).filter(Boolean) as Item[]} compact />
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </section>
         </div>
@@ -137,13 +137,13 @@ export function Reise() {
       </Field>
       <AnimatePresence>
         {treffer.length > 0 && !ort && (
-          <motion.div className="option-list" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+          <m.div className="option-list" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
             {treffer.map((o) => (
               <button key={`${o.lat},${o.lon}`} className="option" onClick={() => { setOrt(o); setTreffer([]); }}>
                 <span className="row-gap"><MapPin size={15} /> {o.name}</span>
               </button>
             ))}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
       <div className="two-col">

@@ -1,5 +1,5 @@
 // Startseite: Outfit des Tages, Serie, Wiederentdecken, Schnellzugriffe.
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { ArrowRight, Check, CloudSun, Luggage, PersonStanding, Plus, Share2, Shuffle, Sparkles, WashingMachine } from "lucide-react";
 import { teileOutfit } from "../lib/teilen";
 import { useMemo, useState } from "react";
@@ -98,13 +98,13 @@ export function Heute() {
       </div>
       <div className="wrap">
         <header className="heute-head banner">
-          <motion.div className="eyebrow" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+          <m.div className="eyebrow" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
             {formatWeekday(heute)}
-          </motion.div>
-          <motion.h1 className="display heute-title" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
+          </m.div>
+          <m.h1 className="display heute-title" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
             {gruss()}<em> 👋</em>
-          </motion.h1>
-          <motion.button className="weather-chip big" onClick={() => setOrtOffen(true)} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          </m.h1>
+          <m.button className="weather-chip big" onClick={() => setOrtOffen(true)} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <CloudSun size={18} strokeWidth={1.6} />
             {wetter && ort ? (
               <span>
@@ -113,15 +113,15 @@ export function Heute() {
             ) : (
               <span>Wetter einbeziehen</span>
             )}
-          </motion.button>
+          </m.button>
         </header>
 
         <section className="ootd">
           <div className="ootd-board">
             <AnimatePresence mode="wait">
-              <motion.div key={heuteGetragen.length ? "heute" : vorschlag?.key ?? "leer"} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} transition={{ duration: 0.35 }}>
+              <m.div key={heuteGetragen.length ? "heute" : vorschlag?.key ?? "leer"} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} transition={{ duration: 0.35 }}>
                 {heuteGetragen.length ? <Collage items={heuteGetragen} /> : vorschlag ? <Collage items={vorschlag.items} animateKey={vorschlag.key} /> : null}
-              </motion.div>
+              </m.div>
             </AnimatePresence>
             {heuteGetragen.length > 0 && (
               <span className="ootd-stamp">
@@ -135,12 +135,12 @@ export function Heute() {
             {!heuteGetragen.length && h && <p className="muted ootd-sub">{h.label}{temp !== null ? ` · passend zu ${temp}°` : ""}</p>}
             <ul className="ootd-list">
               {(heuteGetragen.length ? heuteGetragen : vorschlag?.items ?? []).map((i, n) => (
-                <motion.li key={i.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + n * 0.05 }}>
+                <m.li key={i.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + n * 0.05 }}>
                   <a href={`#/teil/${i.id}`}>
                     <span className="ootd-thumb"><GarmentImage item={i} /></span>
                     <span>{displayName(i)}</span>
                   </a>
-                </motion.li>
+                </m.li>
               ))}
             </ul>
             {!heuteGetragen.length && vorschlag && (
@@ -173,7 +173,7 @@ export function Heute() {
         </section>
 
         <div className="heute-grid">
-          <motion.section className="panel streak" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+          <m.section className="panel streak" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
             <div className="eyebrow">Serie</div>
             <div className="streak-n display">
               <CountUp wert={serie.n} />
@@ -181,15 +181,15 @@ export function Heute() {
             </div>
             <div className="streak-week">
               {serie.woche.map(({ t, an }, i) => (
-                <motion.span key={t} className={`streak-dot ${an ? "is-on" : ""} ${t === heute ? "is-today" : ""}`} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3 + i * 0.05, type: "spring", stiffness: 400, damping: 18 }}>
+                <m.span key={t} className={`streak-dot ${an ? "is-on" : ""} ${t === heute ? "is-today" : ""}`} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3 + i * 0.05, type: "spring", stiffness: 400, damping: 18 }}>
                   {new Intl.DateTimeFormat("de-DE", { weekday: "narrow" }).format(new Date(t))}
-                </motion.span>
+                </m.span>
               ))}
             </div>
-          </motion.section>
+          </m.section>
 
           {wiederentdecken && (
-            <motion.section className="panel rediscover" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}>
+            <m.section className="panel rediscover" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}>
               <div className="eyebrow">Wiederentdecken</div>
               <a href={`#/teil/${wiederentdecken.id}`} className="rediscover-main">
                 <span className="rediscover-img"><GarmentImage item={wiederentdecken} /></span>
@@ -201,16 +201,16 @@ export function Heute() {
               <Button size="s" icon={<ArrowRight size={14} />} onClick={() => go(`outfits?lock=${wiederentdecken.id}`)}>
                 Outfit damit
               </Button>
-            </motion.section>
+            </m.section>
           )}
 
-          <motion.section className="panel quick" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}>
+          <m.section className="panel quick" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}>
             <div className="eyebrow">Schnell</div>
             <a href="#/neu" className="quick-link"><Plus size={18} /> Teil hinzufügen</a>
             <a href="#/outfits?tab=reise" className="quick-link"><Luggage size={18} /> Koffer packen</a>
             <a href="#/schrank?waesche=1" className="quick-link"><WashingMachine size={18} /> Wäsche {inWaesche > 0 && <span className="quick-count">{inWaesche}</span>}</a>
             <a href="#/umkleide" className="quick-link"><PersonStanding size={18} /> Umkleide</a>
-          </motion.section>
+          </m.section>
         </div>
       </div>
       <OrtSheet open={ortOffen} onClose={() => setOrtOffen(false)} />

@@ -1,5 +1,5 @@
 // Analyse: Kennzahlen, Schrankhüter, Lieblinge, Farben, Kategorien, Verkauf.
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Sparkles, Tag } from "lucide-react";
 import { useMemo, useState } from "react";
 import { GarmentImage, ProductCard } from "../components/Garment";
@@ -57,15 +57,15 @@ export function Analyse() {
         </div>
       </header>
 
-      <motion.section className="hero-kpis" {...rein}>
+      <m.section className="hero-kpis" {...rein}>
         <Kpi wert={<CountUp wert={schrank.length} />} label="Teile im Schrank" />
         <Kpi wert={<CountUp wert={k.tage30} />} label="Tage in 30 Tagen erfasst" />
         <Kpi wert={<CountUp wert={Math.round(k.quote * 100)} suffix=" %" />} label="in 90 Tagen getragen" hint={`${Math.round((1 - k.quote) * schrank.length)} Teile hängen nur`} />
         <Kpi wert={<CountUp wert={outfits.length} />} label="Outfits gespeichert" />
-      </motion.section>
+      </m.section>
 
       {k.schlaefer.length > 0 && (
-        <motion.section className="detail-section" {...rein}>
+        <m.section className="detail-section" {...rein}>
           <div className="section-head">
             <div>
               <h2 className="section-title">Schrankhüter</h2>
@@ -84,12 +84,12 @@ export function Analyse() {
               </div>
             ))}
           </div>
-        </motion.section>
+        </m.section>
       )}
 
       <div className="analyse-grid">
         {k.lieblinge.length > 0 && (
-          <motion.section className="panel" {...rein}>
+          <m.section className="panel" {...rein}>
             <h2 className="section-title">Lieblinge</h2>
             <p className="muted section-sub">Am häufigsten getragen</p>
             <ol className="bars">
@@ -101,22 +101,22 @@ export function Analyse() {
                       <span className="piece-thumb small"><GarmentImage item={i} /></span>
                       <span className="bar-main">
                         <span className="bar-label"><span>{displayName(i)}</span><span className="tabular">{c}×</span></span>
-                        <span className="bar-track"><motion.span className="bar-fill" initial={{ width: 0 }} whileInView={{ width: `${(c / maxLieb) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.8, delay: n * 0.06, ease: [0.22, 1, 0.36, 1] }} /></span>
+                        <span className="bar-track"><m.span className="bar-fill" initial={{ width: 0 }} whileInView={{ width: `${(c / maxLieb) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.8, delay: n * 0.06, ease: [0.22, 1, 0.36, 1] }} /></span>
                       </span>
                     </a>
                   </li>
                 );
               })}
             </ol>
-          </motion.section>
+          </m.section>
         )}
 
-        <motion.section className="panel" {...rein}>
+        <m.section className="panel" {...rein}>
           <h2 className="section-title">Farbpalette</h2>
           <p className="muted section-sub">Hauptfarben deiner Teile · {hover ?? "fahr über einen Abschnitt"}</p>
           <div className="color-bar" role="img" aria-label={k.farben.map(([f, n]) => `${f} ${n}`).join(", ")}>
             {k.farben.map(([f, n], i) => (
-              <motion.a
+              <m.a
                 key={f}
                 href={`#/schrank?farbe=${encodeURIComponent(f)}`}
                 className="color-seg"
@@ -140,9 +140,9 @@ export function Analyse() {
               </li>
             ))}
           </ul>
-        </motion.section>
+        </m.section>
 
-        <motion.section className="panel" {...rein}>
+        <m.section className="panel" {...rein}>
           <h2 className="section-title">Kategorien</h2>
           <p className="muted section-sub">Teile pro Kategorie</p>
           <ol className="bars">
@@ -151,15 +151,15 @@ export function Analyse() {
                 <a href={`#/schrank?kat=${c.key}`} className="bar-row">
                   <span className="bar-main">
                     <span className="bar-label"><span>{c.label}</span><span className="tabular">{n}</span></span>
-                    <span className="bar-track"><motion.span className="bar-fill" initial={{ width: 0 }} whileInView={{ width: `${(n / maxKat) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.8, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }} /></span>
+                    <span className="bar-track"><m.span className="bar-fill" initial={{ width: 0 }} whileInView={{ width: `${(n / maxKat) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.8, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }} /></span>
                   </span>
                 </a>
               </li>
             ))}
           </ol>
-        </motion.section>
+        </m.section>
 
-        <motion.section className="panel" {...rein}>
+        <m.section className="panel" {...rein}>
           <h2 className="section-title">Vielseitig</h2>
           <p className="muted section-sub">Mit den meisten verschiedenen Teilen kombiniert</p>
           {k.vielseitig.length ? (
@@ -177,16 +177,16 @@ export function Analyse() {
           ) : (
             <p className="muted">Trag ein, was du anhast – dann siehst du hier deine Allrounder.</p>
           )}
-        </motion.section>
+        </m.section>
 
-        <motion.section className="panel panel-sell" {...rein}>
+        <m.section className="panel panel-sell" {...rein}>
           <h2 className="section-title">Verkauf</h2>
           <div className="sell-stats">
             <div><span className="stat-big tabular">{k.imVerkauf.length}</span><span>im Verkauf</span></div>
             <div><span className="stat-big tabular">{k.verkauft.length}</span><span>verkauft</span></div>
           </div>
           <Button icon={<Tag size={16} />} onClick={() => go("schrank?bereich=verkauf")}>Verkaufsliste öffnen</Button>
-        </motion.section>
+        </m.section>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 // Verkaufen: Anzeigentext und Produktfoto für Vinted vorbereiten, Status pflegen.
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Copy, Download, ExternalLink, PartyPopper, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { saveItem, bild } from "../lib/db";
@@ -89,7 +89,7 @@ export function VerkaufSheet({ item, open, onClose }: { item: Item; open: boolea
       }
     >
       <div className="sell-grid">
-        <motion.div className="sell-steps" initial="a" animate="b" variants={{ b: { transition: { staggerChildren: 0.06 } } }}>
+        <m.div className="sell-steps" initial="a" animate="b" variants={{ b: { transition: { staggerChildren: 0.06 } } }}>
           {[
             { n: 1, t: "Foto speichern", d: "Freigestellt auf hellem Grund im Vinted-Format 4:5.", a: <Button size="s" icon={<Download size={14} />} onClick={fotoSpeichern}>Foto</Button> },
             { n: 2, t: "Text kopieren", d: "Titel und Beschreibung sind fertig formuliert.", a: <Button size="s" icon={<Copy size={14} />} onClick={() => kopiere(`${titel}\n\n${text}`, "Anzeige")}>Kopieren</Button> },
@@ -105,16 +105,16 @@ export function VerkaufSheet({ item, open, onClose }: { item: Item; open: boolea
               ),
             },
           ].map((s) => (
-            <motion.div key={s.n} className="sell-step" variants={{ a: { opacity: 0, y: 10 }, b: { opacity: 1, y: 0 } }}>
+            <m.div key={s.n} className="sell-step" variants={{ a: { opacity: 0, y: 10 }, b: { opacity: 1, y: 0 } }}>
               <span className="sell-step-n">{s.n}</span>
               <div className="sell-step-text">
                 <strong>{s.t}</strong>
                 <span>{s.d}</span>
               </div>
               {s.a}
-            </motion.div>
+            </m.div>
           ))}
-        </motion.div>
+        </m.div>
 
         <div className="stack">
           <Field label="Titel">

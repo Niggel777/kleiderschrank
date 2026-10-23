@@ -1,8 +1,9 @@
 // Konto & Abgleich: Anmelden mit E-Mail und Passwort, Status, Platz sparen.
-import { motion } from "framer-motion";
-import { Cloud, CloudOff, HardDriveDownload, LogOut, RefreshCw } from "lucide-react";
+import { m } from "framer-motion";
+import { HardDriveDownload, LogOut, RefreshCw } from "lucide-react";
 import { useState } from "react";
-import { abgleichen, abmelden, anmelden, platzSparen, useSync } from "../lib/sync";
+import { abgleichen, abmelden, anmelden, platzSparen } from "../lib/sync";
+import { useSync } from "../lib/syncStatus";
 import { useToast } from "./Toast";
 import { Button, Field, Segmented } from "./ui";
 
@@ -23,13 +24,13 @@ export function KontoBereich() {
   const [arbeit, setArbeit] = useState(false);
   const [fehler, setFehler] = useState<string | null>(null);
 
-  if (sync.session) {
+  if (sync.angemeldet) {
     return (
       <div className="konto">
         <div className="konto-status">
           <span className={`sync-dot ${sync.fehler ? "is-err" : sync.laeuft ? "is-busy" : "is-ok"}`} />
           <div>
-            <strong>{sync.session.user.email}</strong>
+            <strong>{sync.email}</strong>
             <span className="muted">
               {sync.fehler ? `Fehler: ${sync.fehler}` : sync.laeuft ? "Gleicht ab …" : `Abgeglichen ${vorWann(sync.zuletzt)}`}
               {sync.offen > 0 && !sync.laeuft ? ` · ${sync.offen} ausstehend` : ""}
@@ -85,9 +86,9 @@ export function KontoBereich() {
         </Field>
       </div>
       {fehler && (
-        <motion.p className="konto-fehler" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}>
+        <m.p className="konto-fehler" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}>
           {fehler}
-        </motion.p>
+        </m.p>
       )}
       <div>
         <Button variant="primary" type="submit" disabled={arbeit}>
@@ -98,14 +99,3 @@ export function KontoBereich() {
   );
 }
 
-/** Kleines Wolken-Symbol in der Kopfleiste. */
-export function SyncAnzeige() {
-  const s = useSync();
-  if (!s.session) return null;
-  const titel = s.fehler ? "Abgleich fehlgeschlagen" : s.laeuft ? "Gleicht ab …" : s.offen ? `${s.offen} Änderungen ausstehend` : "Abgeglichen";
-  return (
-    <a href="#/mehr" className={`icon-btn sync-icon ${s.laeuft ? "is-busy" : ""} ${s.fehler ? "is-err" : ""}`} aria-label={titel} title={titel}>
-      {s.fehler || !navigator.onLine ? <CloudOff size={18} strokeWidth={1.6} /> : <Cloud size={18} strokeWidth={1.6} />}
-    </a>
-  );
-}

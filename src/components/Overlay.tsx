@@ -1,5 +1,5 @@
 // Vollbild-Ebene über der aktuellen Seite (Detailansichten, Hinzufügen).
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { back } from "../lib/router";
@@ -33,7 +33,7 @@ export function Overlay({
   }, [onClose]);
 
   return (
-    <motion.div
+    <m.div
       className={`overlay ${className}`}
       data-lenis-prevent
       role="dialog"
@@ -51,6 +51,6 @@ export function Overlay({
         <div className="overlay-actions">{actions}</div>
       </div>
       {children}
-    </motion.div>
+    </m.div>
   );
 }

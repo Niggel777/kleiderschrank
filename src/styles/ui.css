@@ -540,3 +540,4 @@
 .lightbox-close:hover { background: rgba(255, 255, 255, 0.18); color: #fff; }
 .lightbox-hint { position: absolute; bottom: calc(18px + env(safe-area-inset-bottom)); color: rgba(240, 235, 226, 0.6); font-size: 12.5px; }
 .detail-tile { cursor: zoom-in; }
+.seite-laedt { min-height: 50vh; display: grid; place-items: center; }

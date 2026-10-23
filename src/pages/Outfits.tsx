@@ -1,5 +1,5 @@
 // Outfits: Vorschläge aus dem eigenen Schrank, gespeicherte Outfits, selbst zusammenstellen.
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { Check, CloudSun, Heart, Lock, LockOpen, PersonStanding, Plus, Share2, Shuffle, Sparkles, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Collage } from "../components/Collage";
@@ -50,12 +50,12 @@ export function Outfits({ q }: { q: URLSearchParams }) {
           ]}
         />
       </header>
-      <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
+      <m.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
           {tab === "vorschlaege" && <Vorschlaege lockParam={q.get("lock")} wunsch={q.get("wunsch") === "1"} />}
           {tab === "swipe" && <Swipe />}
           {tab === "gespeichert" && <Gespeichert />}
           {tab === "reise" && <Reise />}
-      </motion.div>
+      </m.div>
     </div>
   );
 }
@@ -144,10 +144,10 @@ function Vorschlaege({ lockParam, wunsch }: { lockParam: string | null; wunsch: 
             const it = byId.get(id);
             if (!it) return null;
             return (
-              <motion.button key={id} className="lock-pill" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={() => setLocked(locked.filter((x) => x !== id))}>
+              <m.button key={id} className="lock-pill" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={() => setLocked(locked.filter((x) => x !== id))}>
                 <span className="lock-thumb"><GarmentImage item={it} /></span>
                 Mit {displayName(it)} <X size={12} />
-              </motion.button>
+              </m.button>
             );
           })}
         </AnimatePresence>
@@ -176,7 +176,7 @@ function Vorschlaege({ lockParam, wunsch }: { lockParam: string | null; wunsch: 
                     const isLocked = locked.includes(it.id);
                     const st = idx.get(it.id);
                     return (
-                      <motion.li key={it.id} layout initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} transition={{ delay: n * 0.04 }}>
+                      <m.li key={it.id} layout initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} transition={{ delay: n * 0.04 }}>
                         <a href={`#/teil/${it.id}`} className="piece">
                           <span className="piece-thumb"><GarmentImage item={it} /></span>
                           <span className="piece-text">
@@ -192,7 +192,7 @@ function Vorschlaege({ lockParam, wunsch }: { lockParam: string | null; wunsch: 
                         >
                           {isLocked ? <Lock size={16} /> : <LockOpen size={16} />}
                         </button>
-                      </motion.li>
+                      </m.li>
                     );
                   })}
                 </AnimatePresence>
@@ -220,7 +220,7 @@ function Vorschlaege({ lockParam, wunsch }: { lockParam: string | null; wunsch: 
           </div>
           <div className="idea-grid">
             {vorschlaege.map((v, n) => (
-              <motion.button
+              <m.button
                 key={v.key + runde}
                 className={`idea ${n === aktiv ? "is-on" : ""}`}
                 onClick={() => {
@@ -233,7 +233,7 @@ function Vorschlaege({ lockParam, wunsch }: { lockParam: string | null; wunsch: 
               >
                 <Collage items={v.items} compact />
                 <span className="idea-label">{v.harmony.label}</span>
-              </motion.button>
+              </m.button>
             ))}
           </div>
         </>
@@ -333,7 +333,7 @@ function Gespeichert() {
       {outfits.map((o, n) => {
         const teile = o.itemIds.map((id) => byId.get(id)).filter(Boolean) as Item[];
         return (
-          <motion.a
+          <m.a
             key={o.id}
             href={`#/outfit/${o.id}`}
             className="outfit-card"
@@ -341,15 +341,15 @@ function Gespeichert() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: Math.min(n, 10) * 0.04, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
-            <motion.div layoutId={`outfit-${o.id}`} className="outfit-tile">
+            <m.div layoutId={`outfit-${o.id}`} className="outfit-tile">
               {o.lookImage ? <LookBild id={o.lookImage} /> : <Collage items={ordne(teile)} compact />}
               {o.favorite && <span className="outfit-fav"><Heart size={14} fill="currentColor" /></span>}
-            </motion.div>
+            </m.div>
             <div className="outfit-info">
               <strong>{o.name}</strong>
               <span>{teile.length} Teile{zuletzt.get(o.id) ? ` · getragen ${formatDayShort(zuletzt.get(o.id)!)}` : ""}</span>
             </div>
-          </motion.a>
+          </m.a>
         );
       })}
     </div>
@@ -394,9 +394,9 @@ export function OutfitDetail({ id }: { id: string }) {
     >
       <div className="detail wrap">
         <div className="detail-media">
-          <motion.div layoutId={`outfit-${o.id}`} className="outfit-hero">
+          <m.div layoutId={`outfit-${o.id}`} className="outfit-hero">
             {o.lookImage ? <LookBild id={o.lookImage} /> : <Collage items={teile} />}
-          </motion.div>
+          </m.div>
         </div>
         <div className="detail-info">
           <div className="eyebrow">{o.source === "umkleide" ? "Look aus der Umkleide" : o.source === "generator" ? "Vorschlag" : "Selbst zusammengestellt"} · {h.label}</div>

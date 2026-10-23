@@ -1,5 +1,5 @@
 // Kalender: was wurde wann getragen. Tag antippen → Teile eintragen oder entfernen.
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Collage } from "../components/Collage";
@@ -86,7 +86,7 @@ export function Kalender() {
           {WOCHENTAGE.map((w) => <span key={w}>{w}</span>)}
         </div>
         <AnimatePresence mode="wait" initial={false} custom={richtung}>
-          <motion.div
+          <m.div
             key={monat.toISOString()}
             className="cal-grid"
             custom={richtung}
@@ -113,7 +113,7 @@ export function Kalender() {
                 </button>
               );
             })}
-          </motion.div>
+          </m.div>
         </AnimatePresence>
       </div>
 

@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { Check } from "lucide-react";
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
 
@@ -25,7 +25,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <div className="toast-zone" aria-live="polite">
         <AnimatePresence>
           {toast && (
-            <motion.div
+            <m.div
               key={toast.id}
               className="toast"
               initial={{ opacity: 0, y: 24, scale: 0.96 }}
@@ -48,7 +48,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   {toast.action.label}
                 </button>
               )}
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>

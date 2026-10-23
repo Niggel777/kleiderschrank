@@ -1,12 +1,12 @@
 // Navigation: obere Leiste (Desktop) und Tab-Leiste mit Plus-Knopf (Handy).
-import { motion } from "framer-motion";
-import { BarChart3, CalendarDays, Home, Plus, Settings2, Shirt, Sparkles, PersonStanding } from "lucide-react";
+import { m } from "framer-motion";
+import { Cloud, CloudOff, BarChart3, CalendarDays, Home, Plus, Settings2, Shirt, Sparkles, PersonStanding } from "lucide-react";
 import type { ReactNode } from "react";
 import type { BaseName } from "../lib/router";
 import { useScrolled } from "./Motion";
 import { useGarderobe } from "../lib/store";
 import { displayName } from "../lib/model";
-import { SyncAnzeige } from "./Konto";
+import { useSync } from "../lib/syncStatus";
 
 const NAV: { name: BaseName; label: string; icon: ReactNode }[] = [
   { name: "heute", label: "Heute", icon: <Home size={20} strokeWidth={1.6} /> },
@@ -30,7 +30,7 @@ export function TopBar({ active }: { active: BaseName }) {
             <a key={n.name} href={`#/${n.name}`} className={`topnav-link ${active === n.name ? "is-on" : ""}`} aria-current={active === n.name ? "page" : undefined}>
               {n.label}
               {active === n.name && (
-                <motion.span layoutId="topnav-line" className="topnav-line" transition={{ type: "spring", stiffness: 500, damping: 40 }} />
+                <m.span layoutId="topnav-line" className="topnav-line" transition={{ type: "spring", stiffness: 500, damping: 40 }} />
               )}
             </a>
           ))}
@@ -89,9 +89,9 @@ export function TabBar({ active }: { active: BaseName }) {
         <Tab key={n.name} {...n} on={active === n.name} />
       ))}
       <a href="#/neu" className="tab-plus" aria-label="Teil hinzufügen">
-        <motion.span whileTap={{ scale: 0.9 }} className="tab-plus-btn">
+        <m.span whileTap={{ scale: 0.9 }} className="tab-plus-btn">
           <Plus size={22} strokeWidth={2} />
-        </motion.span>
+        </m.span>
       </a>
       {tabs.slice(2).map((n) => (
         <Tab key={n.name} {...n} on={active === n.name} />
@@ -103,9 +103,21 @@ export function TabBar({ active }: { active: BaseName }) {
 function Tab({ name, label, icon, on }: { name: BaseName; label: string; icon: ReactNode; on: boolean }) {
   return (
     <a href={`#/${name}`} className={`tab ${on ? "is-on" : ""}`} aria-current={on ? "page" : undefined}>
-      {on && <motion.span layoutId="tab-dot" className="tab-dot" transition={{ type: "spring", stiffness: 500, damping: 36 }} />}
+      {on && <m.span layoutId="tab-dot" className="tab-dot" transition={{ type: "spring", stiffness: 500, damping: 36 }} />}
       {icon}
       <span>{label}</span>
+    </a>
+  );
+}
+
+/** Kleines Wolken-Symbol in der Kopfleiste (nur mit Konto). */
+function SyncAnzeige() {
+  const s = useSync();
+  if (!s.angemeldet) return null;
+  const titel = s.fehler ? "Abgleich fehlgeschlagen" : s.laeuft ? "Gleicht ab …" : s.offen ? `${s.offen} Änderungen ausstehend` : "Abgeglichen";
+  return (
+    <a href="#/mehr" className={`icon-btn sync-icon ${s.laeuft ? "is-busy" : ""} ${s.fehler ? "is-err" : ""}`} aria-label={titel} title={titel}>
+      {s.fehler || !navigator.onLine ? <CloudOff size={18} strokeWidth={1.6} /> : <Cloud size={18} strokeWidth={1.6} />}
     </a>
   );
 }

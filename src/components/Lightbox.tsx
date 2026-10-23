@@ -1,5 +1,5 @@
 // Vollbild-Ansicht eines Bildes: Zoomen (Mausrad, Doppeltipp, zwei Finger), Verschieben, nach unten wischen zum Schließen.
-import { AnimatePresence, motion, useMotionValue, animate } from "framer-motion";
+import { AnimatePresence, m, useMotionValue, animate } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
@@ -38,7 +38,7 @@ export function Lightbox({ src, cut, open, onClose }: { src: string | null; cut:
   return createPortal(
     <AnimatePresence>
       {open && src && (
-        <motion.div
+        <m.div
           className="lightbox"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -46,7 +46,7 @@ export function Lightbox({ src, cut, open, onClose }: { src: string | null; cut:
           onClick={(e) => e.target === e.currentTarget && onClose()}
           onWheel={(e) => zoomen(scale.get() * (e.deltaY > 0 ? 0.88 : 1.14))}
         >
-          <motion.img
+          <m.img
             src={src}
             alt=""
             className={`lightbox-img ${cut ? "is-cut" : ""}`}
@@ -89,7 +89,7 @@ export function Lightbox({ src, cut, open, onClose }: { src: string | null; cut:
             <X size={20} />
           </button>
           <span className="lightbox-hint">Doppeltippen oder zwei Finger zum Zoomen · nach unten wischen zum Schließen</span>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>,
     document.body,

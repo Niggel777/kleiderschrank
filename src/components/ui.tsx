@@ -1,5 +1,5 @@
 // Kleine, wiederverwendbare Bausteine.
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { PALETTE_BY_NAME } from "../lib/colors";
 
@@ -48,7 +48,7 @@ export function Chip({
   return (
     <button className={`chip ${on ? "is-on" : ""}`} aria-pressed={on} onClick={onClick}>
       {on && layoutGroup && (
-        <motion.span
+        <m.span
           layoutId={`chip-bg-${layoutGroup}`}
           className="chip-bg"
           transition={{ type: "spring", stiffness: 500, damping: 38 }}
@@ -94,7 +94,7 @@ export function Segmented<T extends string>({
           onClick={() => onChange(o.value)}
         >
           {value === o.value && (
-            <motion.span
+            <m.span
               layoutId={`seg-${id}`}
               className="segmented-bg"
               transition={{ type: "spring", stiffness: 520, damping: 40 }}
@@ -112,7 +112,7 @@ export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boo
     <label className="toggle">
       <span>{label}</span>
       <button role="switch" aria-checked={on} className={`switch ${on ? "is-on" : ""}`} onClick={() => onChange(!on)}>
-        <motion.span className="switch-knob" layout transition={{ type: "spring", stiffness: 700, damping: 40 }} />
+        <m.span className="switch-knob" layout transition={{ type: "spring", stiffness: 700, damping: 40 }} />
       </button>
     </label>
   );
@@ -130,7 +130,7 @@ export function Empty({
   art?: ReactNode;
 }) {
   return (
-    <motion.div
+    <m.div
       className="empty"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
@@ -140,7 +140,7 @@ export function Empty({
       <h3 className="display empty-title">{title}</h3>
       {text && <p className="empty-text">{text}</p>}
       {action && <div className="empty-action">{action}</div>}
-    </motion.div>
+    </m.div>
   );
 }
 

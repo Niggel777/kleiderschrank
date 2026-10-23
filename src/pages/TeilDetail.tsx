@@ -1,5 +1,5 @@
 // Detailseite eines Teils: großes Bild, Kennzahlen, Tragehistorie, Kombinationen, Verkauf.
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { CalendarPlus, WashingMachine, Check, Heart, Pencil, PersonStanding, ShoppingBag, Sparkles, Tag, Trash2, Wand2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { GarmentImage, ProductCard } from "../components/Garment";
@@ -93,9 +93,9 @@ function Detail({ item }: { item: Item }) {
       actions={
         <>
           <button className={`icon-btn ${item.favorite ? "is-fav" : ""}`} aria-label="Favorit" onClick={() => db.items.update(item.id, { favorite: !item.favorite })}>
-            <motion.span key={String(item.favorite)} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }} style={{ display: "grid" }}>
+            <m.span key={String(item.favorite)} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }} style={{ display: "grid" }}>
               <Heart size={19} fill={item.favorite ? "currentColor" : "none"} />
-            </motion.span>
+            </m.span>
           </button>
           <a className="icon-btn" href={`#/bearbeiten/${item.id}`} aria-label="Bearbeiten">
             <Pencil size={18} />
@@ -108,19 +108,19 @@ function Detail({ item }: { item: Item }) {
     >
       <div className="detail wrap">
         <div className="detail-media">
-          <motion.div layoutId={`media-${item.id}`} className="tile detail-tile" transition={{ type: "spring", stiffness: 260, damping: 32 }} onClick={() => freistellen === null && setGross(true)}>
+          <m.div layoutId={`media-${item.id}`} className="tile detail-tile" transition={{ type: "spring", stiffness: 260, damping: 32 }} onClick={() => freistellen === null && setGross(true)}>
             <AnimatePresence mode="wait" initial={false}>
-              <motion.div key={zeigeOriginal ? "o" : "c"} className="detail-img" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+              <m.div key={zeigeOriginal ? "o" : "c"} className="detail-img" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
                 {zeigeOriginal ? <OriginalBild id={item.imageOriginal!} /> : <GarmentImage item={item} large />}
-              </motion.div>
+              </m.div>
             </AnimatePresence>
             {freistellen !== null && (
               <div className="scan">
-                <motion.span className="scan-line" animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }} />
+                <m.span className="scan-line" animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }} />
                 <span className="scan-label">Freistellen … {Math.round(freistellen * 100)} %</span>
               </div>
             )}
-          </motion.div>
+          </m.div>
           <div className="detail-media-bar">
             {item.imageOriginal && item.imageCutout ? (
               <Segmented id="bild" value={ansicht} onChange={setAnsicht} options={[{ value: "cut", label: "Freigestellt" }, { value: "orig", label: "Original" }]} />
@@ -134,7 +134,7 @@ function Detail({ item }: { item: Item }) {
           </div>
         </div>
 
-        <motion.div className="detail-info" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}>
+        <m.div className="detail-info" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}>
           <div className="eyebrow">
             {item.brand || "Ohne Marke"} · {item.sub || CATEGORY[item.category].singular}
           </div>
@@ -200,7 +200,7 @@ function Detail({ item }: { item: Item }) {
               )}
 
               {item.status === "owned" && idle >= 60 && (
-                <motion.div className="nudge" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.25 }}>
+                <m.div className="nudge" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.25 }}>
                   <div>
                     <strong>{stat.count ? `Seit ${Math.floor(idle / 30)} Monaten nicht getragen.` : `Seit ${Math.floor(idle / 30)} Monaten im Schrank – noch nie getragen.`}</strong>
                     <span>Gib ihm eine Chance in einem neuen Outfit – oder mach jemand anderem eine Freude.</span>
@@ -213,7 +213,7 @@ function Detail({ item }: { item: Item }) {
                       Verkaufen
                     </Button>
                   </div>
-                </motion.div>
+                </m.div>
               )}
 
               {item.status === "selling" && (
@@ -317,7 +317,7 @@ function Detail({ item }: { item: Item }) {
               </Button>
             </section>
           )}
-        </motion.div>
+        </m.div>
       </div>
 
       <VerkaufSheet item={item} open={verkauf} onClose={() => setVerkauf(false)} />

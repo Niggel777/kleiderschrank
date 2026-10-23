@@ -1,5 +1,5 @@
 // Teil anlegen oder bearbeiten: Foto → Freistellen → Farben erkennen → Details.
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { Camera, Check, ChevronDown, ImagePlus, Plus, RefreshCw, RotateCcw, RotateCw, SlidersHorizontal, Sparkles, Wand2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Overlay } from "../components/Overlay";
@@ -158,7 +158,7 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
 
       <AnimatePresence mode="wait">
         {schritt === "foto" && (
-          <motion.div key="foto" className="wrap add-start" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
+          <m.div key="foto" className="wrap add-start" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
             <div className="add-intro">
               <h1 className="display add-title">
                 {item.status === "wish" ? (
@@ -179,9 +179,9 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
             </div>
             <DropZone onFile={starte}>
               <div className="drop-inner">
-                <motion.div className="drop-icon" animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+                <m.div className="drop-icon" animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
                   <Camera size={28} strokeWidth={1.5} />
-                </motion.div>
+                </m.div>
                 <div className="drop-actions">
                   <Button variant="primary" size="l" icon={<Camera size={18} />} onClick={() => kamera.current?.click()}>
                     Foto aufnehmen
@@ -205,16 +205,16 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                 ]}
               />
             </div>
-          </motion.div>
+          </m.div>
         )}
 
         {schritt === "arbeit" && vorschau && (
-          <motion.div key="arbeit" className="wrap add-work" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <m.div key="arbeit" className="wrap add-work" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className="work-stage">
-              <motion.img src={cutUrl ?? vorschau} alt="" className={`work-img ${ergebnis?.freigestellt ? "is-cut" : ""}`} layout />
+              <m.img src={cutUrl ?? vorschau} alt="" className={`work-img ${ergebnis?.freigestellt ? "is-cut" : ""}`} layout />
               {!ergebnis && (
                 <div className="scan">
-                  <motion.span className="scan-line" animate={{ top: ["2%", "98%", "2%"] }} transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }} />
+                  <m.span className="scan-line" animate={{ top: ["2%", "98%", "2%"] }} transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }} />
                 </div>
               )}
             </div>
@@ -235,18 +235,18 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                       <span>{s.t}</span>
                       {"h" in s && status === "now" && <small>{s.h}</small>}
                       {status === "now" && fortschritt && fortschritt.anteil > 0 && fortschritt.anteil < 1 && (
-                        <div className="work-bar"><motion.span animate={{ width: `${Math.round(fortschritt.anteil * 100)}%` }} /></div>
+                        <div className="work-bar"><m.span animate={{ width: `${Math.round(fortschritt.anteil * 100)}%` }} /></div>
                       )}
                     </div>
                   </div>
                 );
               })}
             </div>
-          </motion.div>
+          </m.div>
         )}
 
         {schritt === "form" && (
-          <motion.div key="form" className="wrap add-form" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
+          <m.div key="form" className="wrap add-form" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
             <div className="add-preview">
               <div className="tile add-tile">
                 <Vorschau item={item} ergebnis={ergebnis} original={zeigeOriginal} />
@@ -278,10 +278,10 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
               )}
               <AnimatePresence>
                 {basis && regler && (
-                  <motion.div className="edit-sliders" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+                  <m.div className="edit-sliders" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
                     <label className="fit-slider"><span>Helligkeit</span><input type="range" min={-1} max={1} step={0.05} value={bearb.helligkeit} onChange={(e) => setBearb({ ...bearb, helligkeit: +e.target.value })} /></label>
                     <label className="fit-slider"><span>Wärme</span><input type="range" min={-1} max={1} step={0.05} value={bearb.waerme} onChange={(e) => setBearb({ ...bearb, waerme: +e.target.value })} /></label>
-                  </motion.div>
+                  </m.div>
                 )}
               </AnimatePresence>
             </div>
@@ -320,7 +320,7 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                 <div className="chip-wrap">
                   <AnimatePresence initial={false}>
                     {item.colors.map((c, n) => (
-                      <motion.button
+                      <m.button
                         key={c.name}
                         layout
                         initial={{ opacity: 0, scale: 0.8 }}
@@ -333,7 +333,7 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                         <Swatch name={c.name} size={16} ring /> {c.name}
                         {n === 0 && <small>Hauptfarbe</small>}
                         <X size={12} />
-                      </motion.button>
+                      </m.button>
                     ))}
                   </AnimatePresence>
                   <button className="color-chip add" onClick={() => setFarbwahl(!farbwahl)}>
@@ -342,7 +342,7 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                 </div>
                 <AnimatePresence>
                   {farbwahl && (
-                    <motion.div className="color-picker" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                    <m.div className="color-picker" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
                       <div className="swatch-grid">
                         {PALETTE.map((p) => {
                           const on = item.colors.some((c) => c.name === p.name);
@@ -362,7 +362,7 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                           );
                         })}
                       </div>
-                    </motion.div>
+                    </m.div>
                   )}
                 </AnimatePresence>
               </section>
@@ -456,7 +456,7 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
                 </Button>
               </div>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </Overlay>
@@ -477,7 +477,7 @@ function Vorschau({ item, ergebnis, original }: { item: Item; ergebnis: Verarbei
   const cut = !original && (ergebnis ? Boolean(ergebnis.freigestellt) : Boolean(item.imageCutout));
   return (
     <div className={`garment ${cut ? "is-cut" : "is-photo"}`}>
-      {src && <motion.img key={src} src={src} alt="" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }} />}
+      {src && <m.img key={src} src={src} alt="" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }} />}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 // Tragekalender der letzten 26 Wochen als feines Raster (wie ein Aktivitätsdiagramm).
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { addDays, formatDayShort, isoDay, parseDay } from "../lib/dates";
 
 export function WearStrip({ dates, weeks = 26 }: { dates: string[]; weeks?: number }) {
@@ -35,7 +35,7 @@ export function WearStrip({ dates, weeks = 26 }: { dates: string[]; weeks?: numb
         {spalten.map((s, i) => (
           <div key={i} className="strip-col">
             {s.map((d) => (
-              <motion.span
+              <m.span
                 key={d}
                 className={`strip-cell ${set.has(d) ? "is-on" : ""} ${d > heute ? "is-future" : ""}`}
                 title={set.has(d) ? `Getragen am ${formatDayShort(d)}` : formatDayShort(d)}

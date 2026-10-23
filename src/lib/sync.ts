@@ -1,7 +1,7 @@
 // Abgleich mit Supabase: lokale Änderungen hochladen, fremde Änderungen herunterladen.
 // Lokal bleibt IndexedDB die Quelle für die App (offline-fähig); Supabase ist der Abgleich-Speicher.
 import { createClient, type Session } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import { setzeSyncStatus } from "./syncStatus";
 import { db } from "./db";
 import type { ImageKind, Item, Outfit, Setting, Wear } from "./model";
 
@@ -39,7 +39,7 @@ function schreibe(k: string, v: unknown) {
 
 const ausgang = new Set<string>(lese<string[]>(AUSGANG, []));
 let anwenden = false; // true, während Server-Daten lokal eingespielt werden
-const hoerer = new Set<() => void>();
+const hoerer = new Set<() => void>(); // nur intern
 
 function merke(kind: Kind, id: string) {
   if (anwenden) return;
@@ -82,19 +82,14 @@ let status: SyncStatus = { session: null, laeuft: false, offen: ausgang.size, zu
 function melde(p: Partial<SyncStatus> = {}) {
   status = { ...status, offen: ausgang.size, ...p };
   hoerer.forEach((f) => f());
-}
-
-export function useSync(): SyncStatus {
-  const [s, setS] = useState(status);
-  useEffect(() => {
-    const f = () => setS(status);
-    hoerer.add(f);
-    f();
-    return () => {
-      hoerer.delete(f);
-    };
-  }, []);
-  return s;
+  setzeSyncStatus({
+    angemeldet: Boolean(status.session),
+    email: status.session?.user.email ?? null,
+    laeuft: status.laeuft,
+    offen: status.offen,
+    zuletzt: status.zuletzt,
+    fehler: status.fehler,
+  });
 }
 
 /* ───────── Abgleich ───────── */

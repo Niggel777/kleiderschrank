@@ -1,5 +1,5 @@
 // Outfit als Flat-Lay: Teile wie auf dem Boden ausgelegt arrangieren.
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import type { CategoryKey, Item } from "../lib/model";
 import { GarmentImage } from "./Garment";
 
@@ -60,7 +60,7 @@ export function Collage({ items, animateKey, compact }: { items: Item[]; animate
     <div className={`collage ${compact ? "is-compact" : ""}`}>
       <AnimatePresence mode="popLayout" initial={false}>
         {teile.map(({ item, box }, i) => (
-          <motion.div
+          <m.div
             key={`${item.id}-${animateKey ?? ""}`}
             className="collage-piece"
             style={{ left: `${box.x}%`, top: `${box.y}%`, width: `${box.w}%`, height: `${box.h}%`, zIndex: box.z }}
@@ -70,7 +70,7 @@ export function Collage({ items, animateKey, compact }: { items: Item[]; animate
             transition={{ type: "spring", stiffness: 240, damping: 24, delay: i * 0.05 }}
           >
             <GarmentImage item={item} />
-          </motion.div>
+          </m.div>
         ))}
       </AnimatePresence>
     </div>

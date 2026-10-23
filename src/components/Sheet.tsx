@@ -1,5 +1,5 @@
 // Bottom-Sheet auf dem Handy, zentrierter Dialog auf größeren Bildschirmen.
-import { AnimatePresence, motion, useDragControls, type PanInfo } from "framer-motion";
+import { AnimatePresence, m, useDragControls, type PanInfo } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -49,7 +49,7 @@ export function Sheet({
     <AnimatePresence>
       {open && (
         <div className="sheet-root">
-          <motion.div
+          <m.div
             className="sheet-scrim"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -57,7 +57,7 @@ export function Sheet({
             transition={{ duration: 0.3 }}
             onClick={onClose}
           />
-          <motion.div
+          <m.div
             ref={panel}
             tabIndex={-1}
             role="dialog"
@@ -89,7 +89,7 @@ export function Sheet({
             )}
             <div className="sheet-body">{children}</div>
             {footer && <div className="sheet-foot">{footer}</div>}
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>,

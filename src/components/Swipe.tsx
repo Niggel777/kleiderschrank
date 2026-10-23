@@ -1,5 +1,5 @@
 // Swipe-Modus: Outfits wie Karten wischen. Rechts = speichern, links = weg, hoch = heute anziehen.
-import { AnimatePresence, motion, useMotionValue, useTransform, type PanInfo } from "framer-motion";
+import { AnimatePresence, m, useMotionValue, useTransform, type PanInfo } from "framer-motion";
 import { Check, Heart, RotateCcw, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { db, logWear } from "../lib/db";
@@ -56,13 +56,13 @@ export function Swipe() {
               .map((s, i) => <Karte key={s.key} s={s} tiefe={i} onEntscheid={(r) => entscheide(s, r)} />)
               .reverse()
           ) : (
-            <motion.div key="ende" className="swipe-end" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+            <m.div key="ende" className="swipe-end" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
               <h3 className="display">Durch<em>geswiped.</em></h3>
               <p className="muted">{gemerkt ? `${gemerkt} Outfits gespeichert.` : "Nichts dabei? Neue Runde!"}</p>
               <Button variant="primary" icon={<RotateCcw size={16} />} onClick={() => { setRunde(runde + 1); setPos(0); setGemerkt(0); }}>
                 Neue Runde
               </Button>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>
@@ -94,7 +94,7 @@ function Karte({ s, tiefe, onEntscheid }: { s: Suggestion; tiefe: number; onEnts
   }
 
   return (
-    <motion.div
+    <m.div
       className="swipe-card"
       style={{ x, y, rotate: rot, zIndex: 10 - tiefe }}
       drag={oben}
@@ -125,11 +125,11 @@ function Karte({ s, tiefe, onEntscheid }: { s: Suggestion; tiefe: number; onEnts
       </div>
       {oben && (
         <>
-          <motion.span className="swipe-stamp is-like" style={{ opacity: like }}>Speichern</motion.span>
-          <motion.span className="swipe-stamp is-nope" style={{ opacity: nope }}>Weg</motion.span>
-          <motion.span className="swipe-stamp is-up" style={{ opacity: up }}>Heute</motion.span>
+          <m.span className="swipe-stamp is-like" style={{ opacity: like }}>Speichern</m.span>
+          <m.span className="swipe-stamp is-nope" style={{ opacity: nope }}>Weg</m.span>
+          <m.span className="swipe-stamp is-up" style={{ opacity: up }}>Heute</m.span>
         </>
       )}
-    </motion.div>
+    </m.div>
   );
 }
