@@ -17,10 +17,14 @@ import { harmony, ordne } from "../lib/outfits";
 import { go } from "../lib/router";
 import { forgetImage, useGarderobe, useImageUrl } from "../lib/store";
 import { EBENE, aufStudioHintergrund, lookRendern, startPosition } from "../lib/umkleide";
+import { PUPPE, koerperPlausibel, platziereAmKoerper, type Koerper } from "../lib/koerper";
+import { erkenneKoerper } from "../lib/pose";
 
 interface Person {
   imageId: string;
   aspect: number;
+  /** erkannte Körperpunkte; null = keine Person erkannt, undefined = noch nicht geprüft */
+  koerper?: Koerper | null;
 }
 
 let puppe: Promise<{ blob: Blob; url: string }> | null = null;
@@ -31,8 +35,11 @@ function ladePuppe() {
 export function Umkleide({ q }: { q: URLSearchParams }) {
   const { items, byId, outfits } = useGarderobe();
   const toast = useToast();
-  const personSetting = useLiveQuery(() => db.settings.get("person"), []);
+  // undefined = lädt noch, null = kein eigenes Foto
+  const personSetting = useLiveQuery(async () => (await db.settings.get("person")) ?? null, []);
+  const personBereit = personSetting !== undefined;
   const person = (personSetting?.value as Person | undefined) ?? null;
+  const [erkennung, setErkennung] = useState(false);
   const personUrl = useImageUrl(person?.imageId);
   const [puppeUrl, setPuppeUrl] = useState<string | null>(null);
   const [pieces, setPieces] = useLocal<LayoutPiece[]>("garderobe.umkleide", []);
@@ -47,8 +54,51 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
     if (!person) ladePuppe().then((p) => setPuppeUrl(p.url));
   }, [person]);
 
+  // Körper für bereits gespeicherte Fotos einmalig im Hintergrund erkennen
+  useEffect(() => {
+    if (!person || person.koerper !== undefined) return;
+    let aktiv = true;
+    setErkennung(true);
+    (async () => {
+      const img = await db.images.get(person.imageId);
+      const k = img ? await erkenneKoerper(img.blob).catch(() => null) : null;
+      if (aktiv) await setSetting("person", { ...person, koerper: k && koerperPlausibel(k) ? k : null });
+    })().finally(() => aktiv && setErkennung(false));
+    return () => {
+      aktiv = false;
+    };
+  }, [person]);
+
+  const koerper: Koerper | null = person ? person.koerper ?? null : PUPPE;
+
+  function position(item: Item): LayoutPiece {
+    const z = EBENE[item.category] + Math.random() * 0.01;
+    return koerper ? platziereAmKoerper(item, koerper, aspect, z) : startPosition(item, z);
+  }
+
+  function anpassen() {
+    if (!koerper) return;
+    setAnimiert(true);
+    setPieces(pieces.map((p) => {
+      const it = byId.get(p.itemId);
+      return it ? { ...platziereAmKoerper(it, koerper, aspect, p.z), flip: p.flip } : p;
+    }));
+    setTimeout(() => setAnimiert(false), 700);
+  }
+  const [animiert, setAnimiert] = useState(false);
+
+  // Neues Foto mit erkanntem Körper: angezogene Teile gleich neu ausrichten
+  const fotoSchluessel = person?.koerper ? person.imageId : null;
+  const letztesFoto = useRef(fotoSchluessel);
+  useEffect(() => {
+    if (fotoSchluessel && letztesFoto.current !== fotoSchluessel && pieces.length) anpassen();
+    letztesFoto.current = fotoSchluessel;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fotoSchluessel]);
+
   // Teile aus dem Link übernehmen (?ids=… oder ?outfit=…)
   useEffect(() => {
+    if (!personBereit) return;
     const ids = q.get("ids")?.split(",").filter(Boolean);
     const outfitId = q.get("outfit");
     if (outfitId) {
@@ -69,14 +119,14 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q.toString(), items.length > 0, outfits.length]);
+  }, [q.toString(), items.length > 0, outfits.length, personBereit]);
 
   const sichtbar = pieces.filter((p) => byId.has(p.itemId));
   const aktuelleTeile = ordne(sichtbar.map((p) => byId.get(p.itemId)!));
   const auswahl = sichtbar.find((p) => p.itemId === sel) ?? null;
 
   function platziere(list: Item[]): LayoutPiece[] {
-    return list.map((it) => startPosition(it, EBENE[it.category] + Math.random() * 0.01));
+    return list.map(position);
   }
 
   function anziehen(item: Item) {
@@ -87,7 +137,7 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
     }
     // Teil derselben Kategorie ersetzen (außer Accessoires)
     const rest = item.category === "accessoires" ? pieces : pieces.filter((p) => byId.get(p.itemId)?.category !== item.category && !(item.category === "kleider" && ["oberteile", "unterteile"].includes(byId.get(p.itemId)?.category ?? "")) && !(["oberteile", "unterteile"].includes(item.category) && byId.get(p.itemId)?.category === "kleider"));
-    setPieces([...rest, startPosition(item, EBENE[item.category])]);
+    setPieces([...rest, position(item)]);
     setSel(item.id);
   }
 
@@ -211,7 +261,17 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
     <div className="wrap">
       <header className="shop-head">
         <div>
-          <div className="eyebrow">{person ? "Dein Foto" : "Schneiderpuppe – lade ein Foto von dir hoch"}</div>
+          <div className="eyebrow pose-status">
+            {!person ? (
+              "Schneiderpuppe – lade ein Foto von dir hoch"
+            ) : erkennung ? (
+              <><span className="spinner small" /> Körper wird erkannt …</>
+            ) : person.koerper ? (
+              <><span className="pose-dot" /> Körper erkannt · Teile werden automatisch platziert</>
+            ) : (
+              "Dein Foto · keine Person erkannt, Teile bitte von Hand ausrichten"
+            )}
+          </div>
           <h1 className="display page-title">
             Um<em>kleide</em>
           </h1>
@@ -244,7 +304,7 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
                   return (
                     <div
                       key={p.itemId}
-                      className={`fit-piece ${sel === p.itemId ? "is-sel" : ""}`}
+                      className={`fit-piece ${sel === p.itemId ? "is-sel" : ""} ${animiert ? "is-animated" : ""}`}
                       style={{
                         left: `${p.x * 100}%`,
                         top: `${p.y * 100}%`,
@@ -320,6 +380,11 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
               <Button icon={<Download size={16} />} disabled={!sichtbar.length || speichert} onClick={() => speichern(true)}>
                 Bild
               </Button>
+              {koerper && (
+                <Button variant="ghost" icon={<Wand2 size={16} />} disabled={!sichtbar.length} onClick={anpassen}>
+                  Automatisch anpassen
+                </Button>
+              )}
             </div>
           </div>
 
@@ -383,14 +448,17 @@ function FotoSheet({ open, onClose, person }: { open: boolean; onClose: () => vo
         blob = s.blob;
         aspect = s.aspect;
       }
+      setStatus("Körper wird erkannt …");
+      const k = await erkenneKoerper(blob).catch(() => null);
+      const koerper = k && koerperPlausibel(k) ? k : null;
       const alt = person?.imageId;
       const imageId = await putImage(blob, "person");
-      await setSetting("person", { imageId, aspect });
+      await setSetting("person", { imageId, aspect, koerper });
       if (alt) {
         await db.images.delete(alt);
         forgetImage(alt);
       }
-      toast("Dein Foto ist in der Umkleide");
+      toast(koerper ? "Körper erkannt – Teile werden automatisch angepasst" : "Foto gespeichert – keine Person erkannt, Teile bitte von Hand ausrichten");
       onClose();
     } catch {
       toast("Das Foto konnte nicht verarbeitet werden");

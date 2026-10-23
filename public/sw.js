@@ -14,8 +14,9 @@ self.addEventListener("fetch", (e) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
 
-  // Modell & WASM für das Freistellen: einmal laden, danach immer aus dem Cache
-  if (url.hostname === "staticimgly.com") {
+  // Modelle & WASM (Freistellen, Körpererkennung): einmal laden, danach immer aus dem Cache
+  const modell = url.hostname === "staticimgly.com" || url.hostname === "storage.googleapis.com" || (url.hostname === "cdn.jsdelivr.net" && url.pathname.includes("@mediapipe"));
+  if (modell) {
     e.respondWith(
       caches.open(MODELL).then(async (c) => {
         const hit = await c.match(req);

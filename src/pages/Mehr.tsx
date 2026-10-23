@@ -139,7 +139,7 @@ export function Mehr() {
           )}
         </Gruppe>
 
-        <Gruppe icon={<ShieldCheck size={18} />} titel="Datenschutz" text="Fotos, Teile und Tragehistorie liegen ausschließlich im Speicher dieses Browsers. Das Freistellen läuft auf deinem Gerät; nur das Modell wird einmalig von IMG.LY geladen. Fürs Wetter wird nur der Ort an Open-Meteo geschickt. Kein Konto, kein Tracking." />
+        <Gruppe icon={<ShieldCheck size={18} />} titel="Datenschutz" text="Fotos, Teile und Tragehistorie liegen ausschließlich im Speicher dieses Browsers. Freistellen und Körpererkennung laufen auf deinem Gerät; nur die Modelle werden einmalig von IMG.LY bzw. Google (MediaPipe) geladen. Fürs Wetter wird nur der Ort an Open-Meteo geschickt. Kein Konto, kein Tracking." />
       </div>
 
       {arbeit && (

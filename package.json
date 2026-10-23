@@ -15,6 +15,7 @@
     "@fontsource-variable/geist": "^5.1.0",
     "@fontsource/instrument-serif": "^5.1.0",
     "@imgly/background-removal": "^1.7.0",
+    "@mediapipe/tasks-vision": "^0.10.21",
     "dexie": "^4.0.10",
     "dexie-react-hooks": "^1.1.7",
     "fflate": "^0.8.2",

@@ -9,7 +9,7 @@ Kleidungsstücke fotografieren, der Hintergrund wird direkt im Browser entfernt,
 - **Schrank als Shop:** Kategorien, Suche, Filter (Farbe, Größe, Saison, Anlass, Marke, Favoriten, lange nicht getragen), Sortierung (u. a. nach Größe, Preis, zuletzt getragen)
 - **Teil anlegen:** Foto → Freistellen (ONNX-Modell im Browser) → automatische Farberkennung → Details
 - **Outfits:** Generator nach Farbharmonie, Stil, Anlass, Wetter (Open-Meteo) und Schrankhütern; Teile festhalten und neu mischen; selbst zusammenstellen
-- **Umkleide:** eigenes Foto (optional freigestellt auf Studio-Hintergrund) oder Schneiderpuppe; Teile ziehen, skalieren, drehen; Looks als Bild speichern – auch mit Teilen von der Wunschliste
+- **Umkleide:** eigenes Foto (optional freigestellt auf Studio-Hintergrund) oder Schneiderpuppe; Körpererkennung (MediaPipe Pose) platziert Teile automatisch an Schultern, Hüfte, Beinen und Füßen; Teile ziehen, skalieren, drehen; Looks als Bild speichern – auch mit Teilen von der Wunschliste
 - **Kalender & Tragehistorie:** was wann getragen wurde, Kosten pro Tragen
 - **Analyse:** Tragequote, Schrankhüter, Lieblinge, Farbpalette, Kategorien, Verkaufserlöse
 - **Verkaufen:** Produktfoto, Anzeigentext und Preisvorschlag für Vinted
