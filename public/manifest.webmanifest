@@ -5,8 +5,8 @@
   "start_url": "./#/schrank",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f6f4f0",
-  "theme_color": "#f6f4f0",
+  "background_color": "#07090f",
+  "theme_color": "#07090f",
   "lang": "de",
   "categories": ["lifestyle", "shopping"],
   "icons": [

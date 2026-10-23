@@ -2,6 +2,7 @@
 import { AnimatePresence, m } from "framer-motion";
 import { ArrowRight, Check, CloudSun, Luggage, PersonStanding, Plus, Share2, Shuffle, Sparkles, WashingMachine } from "lucide-react";
 import { teileOutfit } from "../lib/teilen";
+import { Installieren } from "../components/Installieren";
 import { useMemo, useState } from "react";
 import { Collage } from "../components/Collage";
 import { GarmentImage } from "../components/Garment";
@@ -116,6 +117,7 @@ export function Heute() {
           </m.button>
         </header>
 
+        <Installieren />
         <section className="ootd">
           <div className="ootd-board">
             <AnimatePresence mode="wait">

@@ -84,3 +84,11 @@ body::after { background: radial-gradient(55% 55% at 50% 0%, rgba(47, 140, 255, 
 .ootd-title em { background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .ootd-stamp { background: linear-gradient(135deg, #2f8cff, #22c6ff); color: #fff; box-shadow: 0 6px 18px -6px var(--accent-glow); }
 .streak-n { font-size: 44px; }
+
+/* Installieren-Hinweis */
+.install { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 12px; margin-bottom: 14px; border-radius: 20px; background: linear-gradient(135deg, rgba(47, 140, 255, 0.16), rgba(34, 225, 255, 0.06)); border: 1px solid rgba(61, 162, 255, 0.3); box-shadow: 0 16px 40px -24px var(--accent-glow); }
+.install-icon { width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0; }
+.install-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--ink-2); }
+.install-text strong { color: var(--ink); font-size: 14px; }
+.install-inline { vertical-align: -2px; color: var(--accent); }
+.install-x { width: 32px; height: 32px; }

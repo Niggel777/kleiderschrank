@@ -79,7 +79,17 @@ export function CountUp({ wert, suffix = "" }: { wert: number; suffix?: string }
 
 export async function konfetti(): Promise<void> {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  haptik([12, 40, 18]);
   const { default: confetti } = await import("canvas-confetti");
   const farben = ["#9e5428", "#d88f5f", "#16140f", "#50665a", "#e8e3da"];
   confetti({ particleCount: 70, spread: 75, startVelocity: 38, origin: { y: 0.75 }, colors: farben, scalar: 0.9, ticks: 160 });
+}
+
+/** Kurzes Vibrieren als Bestätigung (Android; iOS-Safari ignoriert es still). */
+export function haptik(muster: number | number[] = 12): void {
+  try {
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(muster);
+  } catch {
+    /* nicht unterstützt */
+  }
 }

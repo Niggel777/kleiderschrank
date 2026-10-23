@@ -15,6 +15,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const timer = useRef<number>();
   const show = useCallback((text: string, action?: ToastData["action"]) => {
     window.clearTimeout(timer.current);
+    try { navigator.vibrate?.(10); } catch { /* nicht unterstützt */ }
     setToast({ id: Date.now(), text, action });
     timer.current = window.setTimeout(() => setToast(null), action ? 5200 : 2800);
   }, []);
