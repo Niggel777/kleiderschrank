@@ -1,5 +1,5 @@
 // Offline: App-Dateien und das Freistell-Modell nach dem ersten Laden aus dem Cache bedienen.
-const APP = "garderobe-app-v1";
+const APP = "garderobe-app-v2";
 const MODELL = "garderobe-modell-v1";
 
 self.addEventListener("install", () => self.skipWaiting());
@@ -30,7 +30,21 @@ self.addEventListener("fetch", (e) => {
   }
   if (url.origin !== location.origin) return;
 
-  // App: erst Netz (für Updates), bei Offline aus dem Cache
+  // Gebaute Dateien haben eindeutige Namen (Hash) und ändern sich nie: sofort aus dem Cache
+  if (url.pathname.includes("/assets/")) {
+    e.respondWith(
+      caches.open(APP).then(async (c) => {
+        const hit = await c.match(req);
+        if (hit) return hit;
+        const res = await fetch(req);
+        if (res.ok) c.put(req, res.clone());
+        return res;
+      }),
+    );
+    return;
+  }
+
+  // Seite selbst: erst Netz (für Updates), bei Offline aus dem Cache
   e.respondWith(
     caches.open(APP).then(async (c) => {
       try {
