@@ -11,6 +11,7 @@ export type Route =
   | { name: "bearbeiten"; id: string; q: URLSearchParams }
   | { name: "outfits"; q: URLSearchParams }
   | { name: "outfit"; id: string; q: URLSearchParams }
+  | { name: "freund"; id: string; q: URLSearchParams }
   | { name: "umkleide"; q: URLSearchParams }
   | { name: "kalender"; q: URLSearchParams }
   | { name: "analyse"; q: URLSearchParams }
@@ -31,6 +32,8 @@ export function parse(hash: string): Route {
       return b ? { name: "bearbeiten", id: b, q } : { name: "schrank", q };
     case "outfit":
       return b ? { name: "outfit", id: b, q } : { name: "outfits", q };
+    case "freund":
+      return b ? { name: "freund", id: b, q } : { name: "heute", q };
     case "schrank":
       return { name: "schrank", q };
     case "neu":

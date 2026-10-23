@@ -102,3 +102,11 @@ body::after { background: radial-gradient(55% 55% at 50% 0%, rgba(47, 140, 255, 
   .page-title { font-size: 34px; }
   .shop-head { padding: 18px 0 14px; }
 }
+
+/* Teilen & Freundes-Schrank */
+.freigabe { display: flex; align-items: center; gap: 4px; padding: 6px 6px 6px 14px; border-radius: 14px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); }
+.freigabe-link { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--ink-2); }
+.freund { padding-top: 6px; }
+.freund-info { margin: 4px 0 6px; }
+.freund-kats { display: flex; }
+.freund-card { text-align: left; }

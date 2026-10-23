@@ -1,10 +1,11 @@
 // Einstellungen, Export (Obsidian, Backup), Beispiel-Schrank, Speicher, Datenschutz.
 import { useLiveQuery } from "dexie-react-hooks";
 import { m } from "framer-motion";
-import { Archive, Cloud, Shirt, CloudSun, Download, FileText, HardDrive, Moon, ShieldCheck, Sparkles, Trash2, Upload } from "lucide-react";
+import { Archive, Cloud, Shirt, Users, CloudSun, Download, FileText, HardDrive, Moon, ShieldCheck, Sparkles, Trash2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { OrtSheet } from "../components/OrtSheet";
 import { KontoBereich } from "../components/Konto";
+import { TeilenBereich } from "../components/Teilen";
 import { useToast } from "../components/Toast";
 import { Button, Segmented } from "../components/ui";
 import { db, setSetting, storageEstimate } from "../lib/db";
@@ -60,6 +61,10 @@ export function Mehr() {
       <div className="settings">
         <Gruppe icon={<Cloud size={18} />} titel="Konto & Abgleich" text="Mit Konto liegt dein Schrank sicher in der Cloud und gleicht sich zwischen Handy und Laptop ab. Ohne Konto bleibt alles nur auf diesem Gerät.">
           <KontoBereich />
+        </Gruppe>
+
+        <Gruppe icon={<Users size={18} />} titel="Mit Freunden teilen" text="Erstelle einen Link: Freunde sehen deinen Schrank (ohne Wunschliste und Verkauftes), ohne Konto und ohne etwas ändern zu können. Du kannst den Link jederzeit sperren.">
+          <TeilenBereich />
         </Gruppe>
 
         <Gruppe icon={<Shirt size={18} />} titel="Schrank für" text="Bestimmt Kategorien, Unterarten und Größen beim Anlegen und Filtern.">

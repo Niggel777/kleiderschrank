@@ -17,6 +17,7 @@ const OutfitDetail = lazy(() => import("./pages/Outfits").then((m) => ({ default
 const Umkleide = lazy(() => import("./pages/Umkleide").then((m) => ({ default: m.Umkleide })));
 const Kalender = lazy(() => import("./pages/Kalender").then((m) => ({ default: m.Kalender })));
 const Analyse = lazy(() => import("./pages/Analyse").then((m) => ({ default: m.Analyse })));
+const FreundSchrank = lazy(() => import("./pages/FreundSchrank").then((m) => ({ default: m.FreundSchrank })));
 const Mehr = lazy(() => import("./pages/Mehr").then((m) => ({ default: m.Mehr })));
 
 // Nach dem Start im Leerlauf vorladen, damit Seitenwechsel sofort gehen
@@ -92,6 +93,7 @@ export function App() {
             {route.name === "teil" && <TeilDetail key={`teil-${route.id}`} id={route.id} />}
             {route.name === "neu" && <TeilNeu key="neu" q={route.q} />}
             {route.name === "bearbeiten" && <TeilNeu key={`bearbeiten-${route.id}`} q={route.q} editId={route.id} />}
+            {route.name === "freund" && <FreundSchrank key={`freund-${route.id}`} token={route.id} />}
             {route.name === "outfit" && <OutfitDetail key={`outfit-${route.id}`} id={route.id} />}
           </AnimatePresence>
           </Suspense>
