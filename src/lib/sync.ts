@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { db } from "./db";
 import type { ImageKind, Item, Outfit, Setting, Wear } from "./model";
 
-const URL_ = "https://dcdfwhmwuzqqjpufshsc.supabase.co";
+export const URL_ = "https://dcdfwhmwuzqqjpufshsc.supabase.co";
 // Öffentlicher Schlüssel (für Browser gedacht); Zugriff ist per Row-Level-Security auf den eigenen Nutzer beschränkt.
-const KEY = "sb_publishable_e3_vs2FdQF3VQ29V3brqaw_OvlJELTZ";
+export const KEY = "sb_publishable_e3_vs2FdQF3VQ29V3brqaw_OvlJELTZ";
 
 export const supabase = createClient(URL_, KEY, { auth: { persistSession: true, autoRefreshToken: true, storageKey: "garderobe-auth" } });
 

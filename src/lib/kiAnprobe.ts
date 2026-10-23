@@ -3,6 +3,7 @@
 // nacheinander angezogen: zuerst oben, dann unten. Foto und Teile gehen dabei an Hugging Face.
 import { productShot } from "./image";
 import type { Item } from "./model";
+import { KEY, URL_, supabase } from "./sync";
 
 const SPACE = "franciszzj/Leffa";
 
@@ -63,6 +64,33 @@ export async function kiAnprobe(person: Blob, teile: KiTeil[], onStatus: (s: KiS
   }
 
   async function ablauf(): Promise<Blob> {
+    // Angemeldet: über die eigene Supabase-Funktion mit Hugging-Face-Token (mehr Kontingent)
+    const { data: s } = await supabase.auth.getSession();
+    const jwt = s.session?.access_token;
+    if (jwt) {
+      let aktuell = person;
+      for (let n = 0; n < teile.length; n++) {
+        const { item, bild } = teile[n];
+        const art = artVon(item);
+        if (!art) continue;
+        onStatus({ phase: "rechnen", schritt: `${item.sub || (art === "lower_body" ? "Hose" : "Oberteil")} · ${n + 1} von ${teile.length}` });
+        const kleid = item.imageCutout ? await productShot(bild, "#ffffff", 768, 1024) : bild;
+        const fd = new FormData();
+        fd.append("person", aktuell, "person.jpg");
+        fd.append("kleid", kleid, "kleid.jpg");
+        fd.append("art", art);
+        const r = await originalFetch(`${URL_}/functions/v1/anprobe`, { method: "POST", headers: { Authorization: `Bearer ${jwt}`, apikey: KEY }, body: fd });
+        if (!r.ok) {
+          const j = (await r.json().catch(() => ({}))) as { fehler?: string };
+          throw new Error(fehlertext(j.fehler));
+        }
+        aktuell = await r.blob();
+      }
+      onStatus({ phase: "fertig" });
+      return aktuell;
+    }
+
+    // Nicht angemeldet: direkt und anonym (kleines Kontingent)
     const client = await Client.connect(SPACE, { events: ["data", "status"] });
     let aktuell = person;
     for (let n = 0; n < teile.length; n++) {
@@ -112,6 +140,7 @@ function fehlertext(m?: string): string {
     return `Das kostenlose Tageskontingent von Hugging Face ist aufgebraucht${wann ? ` – wieder verfügbar in ${wann} h` : ""}.`;
   }
   if (/IndexError|pose|keypoint|densepose/i.test(m)) return "Auf dem Foto wurde keine Person erkannt – bitte ein Foto von dir von vorn verwenden.";
+  if (/HF_TOKEN/.test(m)) return "Der Hugging-Face-Token ist noch nicht hinterlegt.";
   if (/queue|full/i.test(m)) return "Die Warteschlange ist voll – bitte gleich noch mal versuchen.";
   return m;
 }
