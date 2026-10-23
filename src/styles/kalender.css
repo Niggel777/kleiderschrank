@@ -1,0 +1,95 @@
+/* ───────── Kalender ───────── */
+.month-nav { display: flex; align-items: center; gap: 4px; }
+.month-label { font-family: var(--font-display); font-size: 24px; min-width: 150px; text-align: center; }
+.month-stats { display: flex; flex-wrap: wrap; gap: 12px 36px; align-items: center; margin-bottom: 24px; }
+.month-stats > div { display: flex; flex-direction: column; }
+.month-stats span:not(.stat-big) { font-size: 12.5px; color: var(--muted); }
+.stat-big { font-family: var(--font-display); font-size: 40px; line-height: 1; }
+.month-fav { display: flex; align-items: center; gap: 12px; padding: 6px 14px 6px 6px; border-radius: var(--r-m); background: var(--surface); border: 1px solid var(--line); }
+.month-fav > span:last-child { display: flex; flex-direction: column; }
+.month-fav strong { font-weight: 540; font-size: 14px; }
+.cal { border-radius: var(--r-l); background: var(--surface); border: 1px solid var(--line); padding: 10px; overflow: hidden; }
+.cal-head { display: grid; grid-template-columns: repeat(7, 1fr); padding: 6px 0 10px; }
+.cal-head span { text-align: center; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-cell {
+  position: relative;
+  aspect-ratio: 0.82;
+  border-radius: 12px;
+  background: var(--bg);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  transition: background 0.2s, transform 0.2s var(--ease);
+  min-width: 0;
+}
+@media (min-width: 720px) {
+  .cal-cell { aspect-ratio: 1.05; padding: 8px; }
+}
+.cal-cell.is-empty { background: transparent; }
+.cal-cell:not(.is-empty):hover { background: var(--tile); transform: translateY(-1px); }
+.cal-cell.has-wear { background: var(--tile); }
+.cal-cell.is-future .cal-num { color: var(--faint); }
+.cal-num { font-size: 12.5px; font-weight: 520; font-variant-numeric: tabular-nums; }
+.cal-cell.is-today .cal-num { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: var(--bg); margin: -3px 0 0 -3px; }
+.cal-thumbs { flex: 1; display: flex; align-items: flex-end; justify-content: center; position: relative; min-height: 0; }
+.cal-thumb { width: 46%; height: 70%; margin: 0 -9%; display: block; }
+.cal-thumb .garment.is-cut img { filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.15)); }
+.cal-more { position: absolute; right: 0; top: -18px; font-size: 10px; color: var(--muted); }
+
+.day { display: grid; gap: 20px; }
+@media (min-width: 760px) {
+  .day { grid-template-columns: 0.8fr 1.2fr; }
+  .day-board { position: sticky; top: 0; align-self: start; }
+}
+.day-board .collage { background: var(--tile); border-radius: var(--r-m); }
+.day-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.day-add { display: flex; flex-direction: column; gap: 14px; }
+.day-add .eyebrow { margin-bottom: 8px; }
+.day-outfits { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.day-outfit { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.day-outfit-board { display: block; background: var(--tile); border-radius: 14px; padding: 8px; transition: background 0.2s; }
+.day-outfit:hover .day-outfit-board { background: var(--tile-2); }
+.day-outfit-name { display: flex; align-items: center; gap: 4px; font-size: 12.5px; }
+
+/* ───────── Analyse ───────── */
+.hero-kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 900px) {
+  .hero-kpis { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+}
+.hero-kpi { display: flex; flex-direction: column; gap: 4px; padding: 20px; border-radius: var(--r-l); background: var(--surface); border: 1px solid var(--line); min-width: 0; }
+.hero-kpi-v { font-family: var(--font-display); font-size: clamp(36px, 5vw, 52px); line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-kpi-l { font-size: 13px; color: var(--ink-2); }
+.hero-kpi-h { font-size: 12px; color: var(--muted); }
+.section-sub { margin: 4px 0 0; font-size: 13px; }
+.sleeper { position: relative; }
+.sleeper-actions { display: flex; gap: 6px; margin-top: 8px; }
+.sleeper-actions button { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); font-size: 12px; transition: border-color 0.2s; }
+.sleeper-actions button:hover { border-color: var(--line-strong); }
+
+.analyse-grid { display: grid; gap: 14px; margin-top: 40px; }
+@media (min-width: 900px) {
+  .analyse-grid { grid-template-columns: 1fr 1fr; gap: 18px; }
+}
+.panel { padding: 24px; border-radius: var(--r-l); background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.panel .section-sub { margin-top: -10px; }
+.bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: flex; align-items: center; gap: 12px; padding: 2px 0; }
+.bar-row:hover .bar-fill { background: var(--ink-2); }
+.piece-thumb.small { width: 40px; height: 46px; padding: 4px; border-radius: 10px; }
+.bar-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.bar-label { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; }
+.bar-label span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { height: 8px; border-radius: 4px; background: var(--tile); overflow: hidden; }
+.bar-fill { display: block; height: 100%; border-radius: 4px; background: var(--ink); transition: background 0.2s; }
+.color-bar { display: flex; gap: 2px; height: 44px; border-radius: 10px; overflow: hidden; }
+.color-seg { display: block; min-width: 6px; transform-origin: bottom; transition: filter 0.2s, flex-grow 0.4s; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06); }
+.color-seg:hover { filter: brightness(1.08) saturate(1.1); }
+.color-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; }
+.color-legend a { display: inline-flex; align-items: center; gap: 6px; }
+.cpw { margin-left: auto; font-weight: 600; font-size: 14px; padding-left: 8px; }
+.sell-stats { display: flex; gap: 28px; flex-wrap: wrap; }
+.sell-stats > div { display: flex; flex-direction: column; }
+.sell-stats span:not(.stat-big) { font-size: 12.5px; color: var(--muted); }
+.panel-sell .btn { align-self: flex-start; }

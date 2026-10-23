@@ -1,0 +1,81 @@
+/* ───────── Schrank ───────── */
+.shop-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 26px 0 20px;
+}
+.shop-bar {
+  position: sticky;
+  top: calc(var(--nav-h) + env(safe-area-inset-top));
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+  padding: 10px 0;
+  margin: 0 calc(var(--gutter) * -1);
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+  background: linear-gradient(var(--bg) 70%, transparent);
+}
+.search {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search:focus-within { border-color: var(--ink); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ink) 7%, transparent); color: var(--ink); }
+.search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-size: 14.5px; color: var(--ink); }
+.search input::placeholder { color: var(--faint); }
+.search input::-webkit-search-cancel-button { display: none; }
+.search-clear { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--tile); color: var(--ink-2); }
+
+.cat-row { gap: 8px; padding: 6px 0 18px; margin: 0 calc(var(--gutter) * -1); padding-left: var(--gutter); padding-right: var(--gutter); }
+.active-filters { overflow: hidden; }
+.active-filters-inner { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding-bottom: 18px; }
+
+.filter-section { padding: 14px 0 18px; border-bottom: 1px solid var(--line); }
+.filter-section:last-child { border-bottom: 0; }
+.filter-section > .eyebrow { margin-bottom: 12px; }
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 12px 6px; }
+.swatch-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); }
+.swatch-btn.is-on { color: var(--ink); font-weight: 560; }
+.swatch-big {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.25s var(--ease), box-shadow 0.25s;
+}
+.swatch-btn:hover .swatch-big { transform: scale(1.08); }
+.swatch-btn.is-on .swatch-big { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), 0 0 0 2px var(--bg), 0 0 0 3.5px var(--ink); }
+.swatch-btn.is-on .swatch-big svg { mix-blend-mode: difference; }
+
+.hero-empty { display: grid; place-items: center; min-height: calc(100dvh - var(--nav-h) - 120px); padding: 20px 0 40px; }
+.hero-empty-art { color: var(--ink); }
+.hanger-art { width: min(300px, 70vw); height: auto; }
+.hero-empty .empty { padding-top: 10px; }
+
+@media (max-width: 639px) {
+  .shop-bar .btn { width: 40px; padding: 0; position: relative; }
+  .shop-bar .btn > span { display: none; }
+  .shop-bar .btn .btn-count { position: absolute; top: -4px; right: -4px; margin: 0; }
+  .shop-bar .btn.has-count > span { display: inline; font-size: 0; }
+  .shop-bar .btn.has-count > span .btn-count { font-size: 11px; }
+}
+@media (hover: none) {
+  .card-action:not(.is-on):first-child { display: none; }
+  .card-action { width: 30px; height: 30px; }
+}

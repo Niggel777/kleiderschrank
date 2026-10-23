@@ -1,0 +1,31 @@
+/* ───────── Mehr ───────── */
+.settings { display: grid; gap: 12px; max-width: 860px; }
+.setting { display: flex; gap: 16px; padding: 20px; border-radius: var(--r-l); background: var(--surface); border: 1px solid var(--line); }
+.setting-icon { width: 40px; height: 40px; border-radius: 14px; background: var(--tile); display: grid; place-items: center; flex-shrink: 0; color: var(--ink-2); }
+.setting-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.setting-main h2 { font-size: 16px; font-weight: 560; }
+.setting-main p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 620px; }
+.setting-ctrl { margin-top: 8px; }
+.storage-bar { height: 8px; border-radius: 4px; background: var(--tile); overflow: hidden; max-width: 420px; }
+.storage-bar span { display: block; height: 100%; border-radius: 4px; background: var(--ink); }
+.busy {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tab-h) + 28px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 14px;
+  box-shadow: var(--shadow-l);
+}
+.busy .spinner { border-color: color-mix(in srgb, var(--bg) 30%, transparent); border-top-color: var(--bg); }
+@media (min-width: 900px) {
+  .busy { bottom: 32px; }
+}
+.colophon { margin: 36px 0 0; font-size: 12px; }

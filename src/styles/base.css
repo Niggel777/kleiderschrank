@@ -1,0 +1,162 @@
+/* ───────── Design-Tokens ───────── */
+:root {
+  --bg: #f6f4f0;
+  --bg-elev: #fbfaf8;
+  --surface: #ffffff;
+  --tile: #ebe8e2;
+  --tile-2: #e2ded6;
+  --ink: #141413;
+  --ink-2: #3b3a37;
+  --muted: #7b776f;
+  --faint: #a8a39a;
+  --line: #e4e0d8;
+  --line-strong: #cfc9bf;
+  --primary: #141413;
+  --primary-ink: #fbfaf8;
+  --rust: #a8502c;
+  --rust-soft: #f3e3d9;
+  --sage: #4e6b55;
+  --sage-soft: #e1e9e1;
+  --danger: #b3261e;
+  --scrim: rgba(20, 20, 19, 0.36);
+  --glass: rgba(246, 244, 240, 0.78);
+  --shadow-s: 0 1px 2px rgba(20, 20, 19, 0.05);
+  --shadow-m: 0 1px 2px rgba(20, 20, 19, 0.04), 0 12px 32px -14px rgba(20, 20, 19, 0.18);
+  --shadow-l: 0 2px 6px rgba(20, 20, 19, 0.05), 0 32px 64px -24px rgba(20, 20, 19, 0.32);
+  --garment-shadow: drop-shadow(0 18px 22px rgba(30, 26, 20, 0.16)) drop-shadow(0 3px 4px rgba(30, 26, 20, 0.08));
+  --r-xs: 8px;
+  --r-s: 12px;
+  --r-m: 18px;
+  --r-l: 26px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-ui: "Geist Variable", "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --gutter: 16px;
+  --nav-h: 64px;
+  --tab-h: 68px;
+  --maxw: 1320px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f0f0e;
+    --bg-elev: #151514;
+    --surface: #1a1a18;
+    --tile: #1d1c1a;
+    --tile-2: #262522;
+    --ink: #efece6;
+    --ink-2: #cdc9c1;
+    --muted: #8f8a81;
+    --faint: #6a665f;
+    --line: #2a2926;
+    --line-strong: #3a3834;
+    --primary: #efece6;
+    --primary-ink: #121211;
+    --rust: #d98a62;
+    --rust-soft: #3a2519;
+    --sage: #8fb398;
+    --sage-soft: #1f2b22;
+    --scrim: rgba(0, 0, 0, 0.55);
+    --glass: rgba(15, 15, 14, 0.74);
+    --garment-shadow: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.45)) drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f0f0e;
+  --bg-elev: #151514;
+  --surface: #1a1a18;
+  --tile: #1d1c1a;
+  --tile-2: #262522;
+  --ink: #efece6;
+  --ink-2: #cdc9c1;
+  --muted: #8f8a81;
+  --faint: #6a665f;
+  --line: #2a2926;
+  --line-strong: #3a3834;
+  --primary: #efece6;
+  --primary-ink: #121211;
+  --rust: #d98a62;
+  --rust-soft: #3a2519;
+  --sage: #8fb398;
+  --sage-soft: #1f2b22;
+  --scrim: rgba(0, 0, 0, 0.55);
+  --glass: rgba(15, 15, 14, 0.74);
+  --garment-shadow: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.45)) drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+  color-scheme: dark;
+}
+
+@media (min-width: 720px) {
+  :root { --gutter: 28px; }
+}
+@media (min-width: 1100px) {
+  :root { --gutter: 40px; }
+}
+
+/* ───────── Basis ───────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.45;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+img { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+button:disabled { cursor: default; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
+::selection { background: var(--ink); color: var(--bg); }
+
+h1, h2, h3, h4 { margin: 0; font-weight: 500; }
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 0.98;
+}
+.display em { font-style: italic; }
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 560;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.muted { color: var(--muted); }
+.tabular { font-variant-numeric: tabular-nums; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+.scroll-x {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+}
+.scroll-x::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

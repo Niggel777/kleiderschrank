@@ -1,0 +1,23 @@
+{
+  "name": "Garderobe – digitaler Kleiderschrank",
+  "short_name": "Garderobe",
+  "description": "Teile freistellen, Outfits kombinieren, anprobieren, Tragehistorie und Verkauf.",
+  "start_url": "./#/schrank",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f4f0",
+  "theme_color": "#f6f4f0",
+  "lang": "de",
+  "categories": ["lifestyle", "shopping"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Teil hinzufügen", "url": "./#/neu" },
+    { "name": "Outfit-Vorschläge", "url": "./#/outfits" },
+    { "name": "Umkleide", "url": "./#/umkleide" }
+  ]
+}
