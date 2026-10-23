@@ -96,7 +96,10 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
 
   async function starte(datei: File | Blob) {
     setVorschau(URL.createObjectURL(datei));
-    setSchritt("arbeit");
+    setErgebnis(null);
+    setBasis(null);
+    // Sofort ins Formular – Freistellen läuft im Hintergrund weiter
+    setSchritt("form");
     setFortschritt({ phase: "vorbereiten", anteil: 0 });
     const r = await verarbeite(datei, freistellen, setFortschritt);
     setFarbenManuell(false);
@@ -104,10 +107,10 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
     setBasis(r);
     setErgebnis(r);
     setItem((i) => ({ ...i, colors: r.farben, aspect: r.aspect }));
+    setFortschritt(null);
     if (r.fehler) toast(r.fehler);
-    // kurze Pause, damit der Abschluss sichtbar ist
-    setTimeout(() => setSchritt("form"), 450);
   }
+  const arbeitet = fortschritt !== null && fortschritt.phase !== "fertig" && !ergebnis;
 
   async function speichern(weiter = false) {
     setSpeichert(true);
@@ -157,9 +160,9 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
       <input ref={kamera} type="file" accept="image/*" capture="environment" hidden onChange={(e) => e.target.files?.[0] && starte(e.target.files[0])} />
       <input ref={galerie} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && starte(e.target.files[0])} />
 
-      <AnimatePresence mode="wait">
+      <>
         {schritt === "foto" && (
-          <m.div key="foto" className="wrap add-start" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
+          <m.div key="foto" className="wrap add-start" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
             <div className="add-intro">
               <h1 className="display add-title">
                 {item.status === "wish" ? (
@@ -256,7 +259,15 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
           <m.div key="form" className="wrap add-form" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
             <div className="add-preview">
               <div className="tile add-tile">
-                <Vorschau item={item} ergebnis={ergebnis} original={zeigeOriginal} />
+                <Vorschau item={item} ergebnis={ergebnis} original={zeigeOriginal} roh={arbeitet ? vorschau : null} />
+                {arbeitet && (
+                  <div className="scan">
+                    <m.span className="scan-line" animate={{ top: ["2%", "98%", "2%"] }} transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }} />
+                    <span className="scan-label">
+                      {fortschritt?.phase === "modell" ? `Modell laden … ${Math.round((fortschritt.anteil ?? 0) * 100)} %` : fortschritt?.phase === "freistellen" ? "Hintergrund wird entfernt …" : "Foto wird vorbereitet …"}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="row-gap add-preview-bar">
                 {(ergebnis?.freigestellt || item.imageCutout) && (ergebnis?.original || item.imageOriginal) && (
@@ -454,23 +465,23 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
 
               <div className="add-save">
                 {!editId && (
-                  <Button size="l" onClick={() => speichern(true)} disabled={speichert}>
+                  <Button size="l" onClick={() => speichern(true)} disabled={speichert || arbeitet}>
                     Speichern & nächstes
                   </Button>
                 )}
-                <Button variant="primary" size="l" icon={<Check size={18} />} onClick={() => speichern()} disabled={speichert}>
-                  {speichert ? "Speichert …" : editId ? "Änderungen speichern" : item.status === "wish" ? "Auf die Wunschliste" : "In den Schrank"}
+                <Button variant="primary" size="l" icon={<Check size={18} />} onClick={() => speichern()} disabled={speichert || arbeitet}>
+                  {arbeitet ? "Wird freigestellt …" : speichert ? "Speichert …" : editId ? "Änderungen speichern" : item.status === "wish" ? "Auf die Wunschliste" : "In den Schrank"}
                 </Button>
               </div>
             </div>
           </m.div>
         )}
-      </AnimatePresence>
+      </>
     </Overlay>
   );
 }
 
-function Vorschau({ item, ergebnis, original }: { item: Item; ergebnis: VerarbeitetesFoto | null; original: boolean }) {
+function Vorschau({ item, ergebnis, original, roh }: { item: Item; ergebnis: VerarbeitetesFoto | null; original: boolean; roh?: string | null }) {
   const [url, setUrl] = useState<string | null>(null);
   const gespeichert = useImageUrl(original ? item.imageOriginal : item.imageCutout ?? item.imageOriginal);
   useEffect(() => {
@@ -480,8 +491,8 @@ function Vorschau({ item, ergebnis, original }: { item: Item; ergebnis: Verarbei
     setUrl(u);
     return () => URL.revokeObjectURL(u);
   }, [ergebnis, original]);
-  const src = ergebnis ? url : gespeichert;
-  const cut = !original && (ergebnis ? Boolean(ergebnis.freigestellt) : Boolean(item.imageCutout));
+  const src = roh ?? (ergebnis ? url : gespeichert);
+  const cut = !roh && !original && (ergebnis ? Boolean(ergebnis.freigestellt) : Boolean(item.imageCutout));
   return (
     <div className={`garment ${cut ? "is-cut" : "is-photo"}`}>
       {src && <m.img key={src} src={src} alt="" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }} />}

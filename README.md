@@ -12,6 +12,11 @@ Kleidungsstücke fotografieren, der Hintergrund wird direkt im Browser entfernt,
 - **Teilen:** Outfit als Story-Bild (9:16) über das Teilen-Menü des Handys
 - **Wäsche-Status:** Teile in der Wäsche werden nicht vorgeschlagen
 - **Gürtel:** passend zu Hose und Schuhfarbe in Vorschlägen
+- **Shop-Link-Import:** Wunschteil per Link (Produktbild, Name, Marke), Fallback Screenshot
+- **Mit Freunden teilen:** Freigabe-Link, Schrank ohne Konto ansehen, jederzeit sperrbar
+- **KI-Anprobe (Leffa):** Oberteil + Hose nacheinander auf dem eigenen Foto, über Supabase-Funktion mit geheimem Hugging-Face-Token
+- **Cloud-Abgleich:** Supabase (Login, Row-Level-Security, privater Bilder-Bucket)
+- **App-Gefühl:** Installieren-Hinweis, Haptik, Wischen zum Zurückgehen, schnelle Ladezeiten (Code-Splitting, LazyMotion, Bilder nach Sichtbarkeit)
 - **Schrank als Shop:** Kategorien, Suche, Filter (Farbe, Größe, Saison, Anlass, Marke, Favoriten, lange nicht getragen), Sortierung (u. a. nach Größe, Farbe, zuletzt getragen)
 - **Herren-Profil** (umschaltbar): Kategorien, Unterarten und Größen für Herren
 - **Teil anlegen:** Foto → Freistellen (ONNX-Modell im Browser) → automatische Farberkennung → Details
