@@ -61,10 +61,12 @@ export function imageUrl(id: string): Promise<string | null> {
   if (fertig) return Promise.resolve(fertig);
   let p = laden.get(id);
   if (!p) {
-    p = db.images.get(id).then((img) => {
+    p = db.images.get(id).then(async (img) => {
+      // Fehlt das Bild lokal (anderes Gerät / Platz gespart), aus der Cloud holen
+      const blob = img?.blob ?? (await import("./sync").then((s) => s.bildAusCloud(id)));
       laden.delete(id);
-      if (!img) return null;
-      const u = URL.createObjectURL(img.blob);
+      if (!blob) return null;
+      const u = URL.createObjectURL(blob);
       urls.set(id, u);
       return u;
     });

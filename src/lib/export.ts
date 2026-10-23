@@ -1,6 +1,6 @@
 // Export als Obsidian-Vault (Markdown + Bilder, Dataview-tauglich) und Backup/Restore.
 import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from "fflate";
-import { db } from "./db";
+import { db,  bild as ladeBild } from "./db";
 import { isoDay } from "./dates";
 import { CATEGORY, STATUS_LABEL, displayName, type Item, type Outfit, type Setting, type StoredImage, type Wear } from "./model";
 import { statOf, wearIndex } from "./stats";
@@ -42,7 +42,7 @@ export async function obsidianVault(): Promise<Blob> {
     const bildId = i.imageCutout ?? i.imageOriginal;
     let bild = "";
     if (bildId) {
-      const img = await db.images.get(bildId);
+      const img = await ladeBild(bildId);
       if (img) {
         bild = `Bilder/${i.id}.${EXT[img.blob.type] ?? "png"}`;
         files[`${R}/${bild}`] = [await bytes(img.blob), { level: 0 }];

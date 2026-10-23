@@ -1,9 +1,10 @@
 // Einstellungen, Export (Obsidian, Backup), Beispiel-Schrank, Speicher, Datenschutz.
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion } from "framer-motion";
-import { Archive, Shirt, CloudSun, Download, FileText, HardDrive, Moon, ShieldCheck, Sparkles, Trash2, Upload } from "lucide-react";
+import { Archive, Cloud, Shirt, CloudSun, Download, FileText, HardDrive, Moon, ShieldCheck, Sparkles, Trash2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { OrtSheet } from "../components/OrtSheet";
+import { KontoBereich } from "../components/Konto";
 import { useToast } from "../components/Toast";
 import { Button, Segmented } from "../components/ui";
 import { db, setSetting, storageEstimate } from "../lib/db";
@@ -57,6 +58,10 @@ export function Mehr() {
       </header>
 
       <div className="settings">
+        <Gruppe icon={<Cloud size={18} />} titel="Konto & Abgleich" text="Mit Konto liegt dein Schrank sicher in der Cloud und gleicht sich zwischen Handy und Laptop ab. Ohne Konto bleibt alles nur auf diesem Gerät.">
+          <KontoBereich />
+        </Gruppe>
+
         <Gruppe icon={<Shirt size={18} />} titel="Schrank für" text="Bestimmt Kategorien, Unterarten und Größen beim Anlegen und Filtern.">
           <Segmented
             id="profil"
@@ -152,7 +157,7 @@ export function Mehr() {
           )}
         </Gruppe>
 
-        <Gruppe icon={<ShieldCheck size={18} />} titel="Datenschutz" text="Fotos, Teile und Tragehistorie liegen ausschließlich im Speicher dieses Browsers. Freistellen und Körpererkennung laufen auf deinem Gerät; nur die Modelle werden einmalig von IMG.LY bzw. Google (MediaPipe) geladen. Fürs Wetter wird nur der Ort an Open-Meteo geschickt. Kein Konto, kein Tracking." />
+        <Gruppe icon={<ShieldCheck size={18} />} titel="Datenschutz" text="Ohne Konto liegen Fotos, Teile und Tragehistorie nur im Speicher dieses Browsers; mit Konto zusätzlich in deinem privaten Supabase-Speicher (Frankfurt), den nur du lesen kannst. Freistellen und Körpererkennung laufen auf deinem Gerät; nur die Modelle werden einmalig von IMG.LY bzw. Google (MediaPipe) geladen. Fürs Wetter wird nur der Ort an Open-Meteo geschickt. Kein Konto, kein Tracking." />
       </div>
 
       {arbeit && (

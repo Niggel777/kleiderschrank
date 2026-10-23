@@ -1,5 +1,5 @@
 // Umkleide: Startpositionen der Teile auf der Person und Export als Bild.
-import { db } from "./db";
+import { bild } from "./db";
 import { loadBitmap, toBlob } from "./image";
 import type { Item, LayoutPiece } from "./model";
 
@@ -54,7 +54,7 @@ export async function lookRendern(
     const item = items.get(piece.itemId);
     const id = item?.imageCutout ?? item?.imageOriginal;
     if (!item || !id) continue;
-    const img = await db.images.get(id);
+    const img = await bild(id);
     if (!img) continue;
     const bmp = await loadBitmap(img.blob);
     const w = piece.w * W;

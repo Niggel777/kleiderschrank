@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { Copy, Download, ExternalLink, PartyPopper, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
-import { db, saveItem } from "../lib/db";
+import { saveItem, bild } from "../lib/db";
 import { isoDay } from "../lib/dates";
 import { download, productShot } from "../lib/image";
 import { CONDITIONS, type Condition, type Item } from "../lib/model";
@@ -46,7 +46,7 @@ export function VerkaufSheet({ item, open, onClose }: { item: Item; open: boolea
   async function fotoSpeichern() {
     const id = item.imageCutout ?? item.imageOriginal;
     if (!id) return;
-    const img = await db.images.get(id);
+    const img = await bild(id);
     if (!img) return;
     const blob = item.imageCutout ? await productShot(img.blob) : img.blob;
     download(blob, `${titel.replace(/[^\wäöüÄÖÜß -]/g, "").replace(/\s+/g, "-") || "teil"}.jpg`);

@@ -1,6 +1,6 @@
 // Outfit als Story-Bild (1080 × 1920) erzeugen und teilen.
 import { layout } from "../components/Collage";
-import { db } from "./db";
+import { bild } from "./db";
 import { formatDay, isoDay } from "./dates";
 import { download, loadBitmap, toBlob } from "./image";
 import { displayName, type Item } from "./model";
@@ -50,7 +50,7 @@ export async function storyBild(items: Item[], titel: string, untertitel: string
   const fx = kx + kw * 0.06, fy = ky + kh * 0.05, fw = kw * 0.88, fh = kh * 0.9;
   for (const { item, box } of layout(items).sort((a, b) => a.box.z - b.box.z)) {
     const id = item.imageCutout ?? item.imageOriginal ?? item.imageThumb;
-    const img = id ? await db.images.get(id) : undefined;
+    const img = id ? await bild(id) : undefined;
     if (!img) continue;
     const bmp = await loadBitmap(img.blob);
     const bw = (box.w / 100) * fw, bh = (box.h / 100) * fh;

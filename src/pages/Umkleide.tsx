@@ -8,7 +8,7 @@ import { Sheet } from "../components/Sheet";
 import { useToast } from "../components/Toast";
 import { Button, Chip, Segmented, Toggle } from "../components/ui";
 import { mannequinSvg, svgToPng } from "../demo/garments";
-import { db, putImage, setSetting } from "../lib/db";
+import { db, putImage, setSetting, bild } from "../lib/db";
 import { hintergrundEntfernen } from "../lib/freistellen";
 import { download, normalizePhoto } from "../lib/image";
 import { useLocal } from "../lib/hooks";
@@ -60,7 +60,7 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
     let aktiv = true;
     setErkennung(true);
     (async () => {
-      const img = await db.images.get(person.imageId);
+      const img = await bild(person.imageId);
       const k = img ? await erkenneKoerper(img.blob).catch(() => null) : null;
       if (aktiv) await setSetting("person", { ...person, koerper: k && koerperPlausibel(k) ? k : null });
     })().finally(() => aktiv && setErkennung(false));
@@ -225,7 +225,7 @@ export function Umkleide({ q }: { q: URLSearchParams }) {
     setSpeichert(true);
     try {
       let basis: Blob;
-      if (person) basis = (await db.images.get(person.imageId))!.blob;
+      if (person) basis = (await bild(person.imageId))!.blob;
       else basis = (await ladePuppe()).blob;
       const blob = await lookRendern(basis, aspect, sichtbar, byId);
       if (alsDatei) {

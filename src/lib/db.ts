@@ -98,3 +98,12 @@ export async function storageEstimate(): Promise<{ used: number; quota: number }
   const e = await navigator.storage.estimate();
   return { used: e.usage ?? 0, quota: e.quota ?? 0 };
 }
+
+/** Bild lokal lesen – fehlt es (zweites Gerät, Platz gespart), wird es aus der Cloud geholt. */
+export async function bild(id: string): Promise<{ blob: Blob } | undefined> {
+  const lokal = await db.images.get(id);
+  if (lokal) return lokal;
+  const { bildAusCloud } = await import("./sync");
+  const blob = await bildAusCloud(id);
+  return blob ? { blob } : undefined;
+}

@@ -6,7 +6,7 @@ import { Overlay } from "../components/Overlay";
 import { useToast } from "../components/Toast";
 import { Button, Chip, Field, Segmented, Swatch, Toggle } from "../components/ui";
 import { PALETTE, PALETTE_BY_NAME } from "../lib/colors";
-import { db, putImage, saveItem } from "../lib/db";
+import { db, putImage, saveItem, bild } from "../lib/db";
 import { isoDay } from "../lib/dates";
 import { verarbeite, type Fortschritt, type VerarbeitetesFoto } from "../lib/freistellen";
 import { STANDARD, bearbeite, type Bearbeitung } from "../lib/bearbeiten";
@@ -58,7 +58,7 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
 
   async function bildBearbeiten() {
     // Beim Bearbeiten eines gespeicherten Teils die Bilder aus der Datenbank laden
-    const [o, c] = await Promise.all([item.imageOriginal ? db.images.get(item.imageOriginal) : undefined, item.imageCutout ? db.images.get(item.imageCutout) : undefined]);
+    const [o, c] = await Promise.all([item.imageOriginal ? bild(item.imageOriginal) : undefined, item.imageCutout ? bild(item.imageCutout) : undefined]);
     const original = o?.blob ?? c?.blob;
     if (!original) return;
     setFarbenManuell(true);

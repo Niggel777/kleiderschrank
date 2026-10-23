@@ -10,7 +10,7 @@ import { VerkaufSheet } from "../components/VerkaufSheet";
 import { Lightbox } from "../components/Lightbox";
 import { WearStrip } from "../components/WearStrip";
 import { Button, Segmented, Swatch } from "../components/ui";
-import { db, deleteItem, logWear, putImage, saveItem, unlogWear } from "../lib/db";
+import { db, deleteItem, logWear, putImage, saveItem, unlogWear, bild } from "../lib/db";
 import { formatDay, formatDayShort, isoDay, relativeDay } from "../lib/dates";
 import { hintergrundEntfernen } from "../lib/freistellen";
 import { colorsOf, makeThumb, trimTransparent } from "../lib/image";
@@ -60,7 +60,7 @@ function Detail({ item }: { item: Item }) {
 
   async function nachtraeglichFreistellen() {
     if (!item.imageOriginal) return;
-    const orig = await db.images.get(item.imageOriginal);
+    const orig = await bild(item.imageOriginal);
     if (!orig) return;
     setFreistellen(0);
     try {

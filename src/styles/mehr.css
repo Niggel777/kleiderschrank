@@ -29,3 +29,15 @@
   .busy { bottom: 32px; }
 }
 .colophon { margin: 36px 0 0; font-size: 12px; }
+.konto { display: flex; flex-direction: column; gap: 14px; max-width: 560px; }
+.konto-status { display: flex; align-items: center; gap: 12px; }
+.konto-status > div { display: flex; flex-direction: column; font-size: 13.5px; }
+.konto-status strong { font-weight: 560; font-size: 14.5px; }
+.konto-fehler { margin: 0; color: var(--danger); font-size: 13.5px; }
+.sync-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.sync-dot.is-ok { background: var(--sage); box-shadow: 0 0 0 4px var(--sage-soft); }
+.sync-dot.is-busy { background: var(--accent); animation: puls 1s ease-in-out infinite alternate; }
+.sync-dot.is-err { background: var(--danger); }
+@keyframes puls { to { opacity: 0.35; } }
+.sync-icon.is-busy svg { animation: puls 0.8s ease-in-out infinite alternate; color: var(--accent); }
+.sync-icon.is-err { color: var(--danger); }

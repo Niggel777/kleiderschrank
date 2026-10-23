@@ -17,9 +17,11 @@ import "./styles/swipe.css";
 import { App } from "./App";
 import { installRouter } from "./lib/router";
 import { startSmoothScroll } from "./components/Motion";
+import { startSync } from "./lib/sync";
 
 installRouter();
 startSmoothScroll();
+startSync();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

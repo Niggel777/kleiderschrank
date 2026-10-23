@@ -4,6 +4,7 @@ import { BarChart3, CalendarDays, Home, Plus, Settings2, Shirt, Sparkles, Person
 import type { ReactNode } from "react";
 import type { BaseName } from "../lib/router";
 import { useScrolled } from "./Motion";
+import { SyncAnzeige } from "./Konto";
 
 const NAV: { name: BaseName; label: string; icon: ReactNode }[] = [
   { name: "heute", label: "Heute", icon: <Home size={20} strokeWidth={1.6} /> },
@@ -33,6 +34,7 @@ export function TopBar({ active }: { active: BaseName }) {
           ))}
         </nav>
         <div className="topbar-actions">
+          <SyncAnzeige />
           <a href="#/kalender" className={`icon-btn only-mobile ${active === "kalender" ? "is-on" : ""}`} aria-label="Kalender">
             <CalendarDays size={19} strokeWidth={1.6} />
           </a>
