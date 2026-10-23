@@ -1,15 +1,16 @@
 // Darstellung eines Kleidungsstücks: freigestellt mit weichem Schatten oder als Foto.
 import { motion } from "framer-motion";
 import { Heart, Check } from "lucide-react";
-import { memo } from "react";
+import { forwardRef, memo } from "react";
 import { relativeDay } from "../lib/dates";
 import { db, logWear } from "../lib/db";
-import { isoDay, euro } from "../lib/dates";
+import { isoDay } from "../lib/dates";
 import { displayName, type Item } from "../lib/model";
 import { displayImageId, useImageUrl } from "../lib/store";
 import { idleDays, type WearStat } from "../lib/stats";
 import { useToast } from "./Toast";
 import { Swatch } from "./ui";
+import { Tilt } from "./Motion";
 
 export const GarmentImage = memo(function GarmentImage({
   item,
@@ -42,17 +43,12 @@ export const GarmentImage = memo(function GarmentImage({
   );
 });
 
-export function ProductCard({
-  item,
-  stat,
-  index = 0,
-  onOpen,
-}: {
+export const ProductCard = forwardRef<HTMLElement, {
   item: Item;
   stat: WearStat;
   index?: number;
   onOpen?: () => void;
-}) {
+}>(function ProductCard({ item, stat, index = 0, onOpen }, ref) {
   const toast = useToast();
   const idle = idleDays(item, stat);
   const heute = stat.last === isoDay();
@@ -72,6 +68,7 @@ export function ProductCard({
 
   return (
     <motion.article
+      ref={ref}
       className="card"
       layout="position"
       initial={{ opacity: 0, y: 18 }}
@@ -89,11 +86,14 @@ export function ProductCard({
           }
         }}
       >
-        <motion.div layoutId={`media-${item.id}`} className="tile" transition={{ type: "spring", stiffness: 260, damping: 32 }}>
-          <GarmentImage item={item} />
-        </motion.div>
+        <Tilt>
+          <motion.div layoutId={`media-${item.id}`} className="tile" transition={{ type: "spring", stiffness: 260, damping: 32 }}>
+            <GarmentImage item={item} />
+          </motion.div>
+        </Tilt>
         <div className="card-badges">
           {item.status === "wish" && <span className="badge">Wunsch</span>}
+          {item.inWaesche && <span className="badge badge-wash">Wäsche</span>}
           {item.status === "selling" && <span className="badge badge-rust">Zum Verkauf</span>}
           {item.status === "sold" && <span className="badge">Verkauft</span>}
           {schlaefer && <span className="badge badge-quiet">{stat.count ? `${Math.floor(idle / 30)} Mon. nicht getragen` : "Noch nie getragen"}</span>}
@@ -112,7 +112,6 @@ export function ProductCard({
       <a href={`#/teil/${item.id}`} className="card-info" tabIndex={-1}>
         <div className="card-row">
           <span className="card-brand">{item.brand || item.sub || "Ohne Marke"}</span>
-          {item.price !== null && <span className="card-price tabular">{euro(item.price)}</span>}
         </div>
         <div className="card-name">{displayName(item)}</div>
         <div className="card-meta">
@@ -128,4 +127,4 @@ export function ProductCard({
       </a>
     </motion.article>
   );
-}
+});

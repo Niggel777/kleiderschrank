@@ -1,6 +1,6 @@
 // Detailseite eines Teils: großes Bild, Kennzahlen, Tragehistorie, Kombinationen, Verkauf.
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarPlus, Check, Heart, Pencil, PersonStanding, ShoppingBag, Sparkles, Tag, Trash2, Wand2, X } from "lucide-react";
+import { CalendarPlus, WashingMachine, Check, Heart, Pencil, PersonStanding, ShoppingBag, Sparkles, Tag, Trash2, Wand2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { GarmentImage, ProductCard } from "../components/Garment";
 import { Overlay } from "../components/Overlay";
@@ -10,13 +10,13 @@ import { VerkaufSheet } from "../components/VerkaufSheet";
 import { WearStrip } from "../components/WearStrip";
 import { Button, Segmented, Swatch } from "../components/ui";
 import { db, deleteItem, logWear, putImage, saveItem, unlogWear } from "../lib/db";
-import { euro, formatDay, formatDayShort, isoDay, relativeDay } from "../lib/dates";
+import { formatDay, formatDayShort, isoDay, relativeDay } from "../lib/dates";
 import { hintergrundEntfernen } from "../lib/freistellen";
 import { colorsOf, makeThumb, trimTransparent } from "../lib/image";
 import { CATEGORY, STATUS_LABEL, displayName, type Item } from "../lib/model";
 import { passendZu } from "../lib/outfits";
 import { back, go } from "../lib/router";
-import { costPerWear, idleDays, statOf } from "../lib/stats";
+import { idleDays, kombiPartner, statOf } from "../lib/stats";
 import { forgetImage, useGarderobe, useImageUrl } from "../lib/store";
 
 export function TeilDetail({ id }: { id: string }) {
@@ -37,7 +37,8 @@ function Detail({ item }: { item: Item }) {
   const toast = useToast();
   const stat = statOf(idx, item.id);
   const idle = idleDays(item, stat);
-  const cpw = costPerWear(item, stat);
+  const { wears } = useGarderobe();
+  const kombis = useMemo(() => kombiPartner(wears).get(item.id)?.size ?? 0, [wears, item.id]);
   const [ansicht, setAnsicht] = useState<"cut" | "orig">("cut");
   const [verkauf, setVerkauf] = useState(false);
   const [loeschen, setLoeschen] = useState(false);
@@ -138,7 +139,6 @@ function Detail({ item }: { item: Item }) {
           <h1 className="display detail-title">{displayName(item)}</h1>
           <div className="detail-meta">
             {item.size && <span>{item.size === "One Size" ? "One Size" : `Größe ${item.size}`}</span>}
-            {item.price !== null && <span>{euro(item.price)}</span>}
             {item.purchaseDate && <span>gekauft {formatDay(item.purchaseDate)}</span>}
             {item.status !== "owned" && <span className={`status status-${item.status}`}>{STATUS_LABEL[item.status]}</span>}
           </div>
@@ -166,8 +166,8 @@ function Detail({ item }: { item: Item }) {
                   <span className="kpi-l">{stat.last ? (stat.last === isoDay() ? "zuletzt" : "zuletzt, vor") : "noch nie getragen"}</span>
                 </div>
                 <div className="kpi">
-                  <span className="kpi-v tabular">{cpw !== null ? euro(cpw, cpw < 10 ? 2 : 0) : "–"}</span>
-                  <span className="kpi-l">pro Tragen</span>
+                  <span className="kpi-v tabular">{kombis}</span>
+                  <span className="kpi-l">{kombis === 1 ? "Kombipartner" : "Kombipartner"}</span>
                 </div>
               </div>
 
@@ -182,6 +182,17 @@ function Detail({ item }: { item: Item }) {
                   </Button>
                   <Button size="l" icon={<PersonStanding size={18} />} onClick={() => go(`umkleide?ids=${item.id}`)}>
                     Anprobieren
+                  </Button>
+                  <Button
+                    size="l"
+                    variant={item.inWaesche ? "primary" : "secondary"}
+                    icon={<WashingMachine size={18} />}
+                    onClick={async () => {
+                      await db.items.update(item.id, { inWaesche: !item.inWaesche });
+                      toast(item.inWaesche ? "Wieder im Schrank" : "In der Wäsche – wird nicht vorgeschlagen");
+                    }}
+                  >
+                    {item.inWaesche ? "Aus der Wäsche" : "In die Wäsche"}
                   </Button>
                 </div>
               )}
@@ -206,8 +217,8 @@ function Detail({ item }: { item: Item }) {
               {item.status === "selling" && (
                 <div className="nudge nudge-rust">
                   <div>
-                    <strong>Steht zum Verkauf{item.salePrice !== null ? ` für ${euro(item.salePrice)}` : ""}.</strong>
-                    <span>Schon verkauft? Dann trag den Erlös ein.</span>
+                    <strong>Steht zum Verkauf.</strong>
+                    <span>Schon verkauft? Dann markier es als verkauft.</span>
                   </div>
                   <Button size="s" icon={<Tag size={14} />} onClick={() => setVerkauf(true)}>
                     Verkauf verwalten
@@ -217,7 +228,7 @@ function Detail({ item }: { item: Item }) {
               {item.status === "sold" && (
                 <div className="nudge">
                   <div>
-                    <strong>Verkauft{item.soldPrice !== null ? ` für ${euro(item.soldPrice)}` : ""}{item.soldAt ? ` am ${formatDay(item.soldAt)}` : ""}.</strong>
+                    <strong>Verkauft{item.soldAt ? ` am ${formatDay(item.soldAt)}` : ""}.</strong>
                     <span>Bleibt in deiner Statistik erhalten.</span>
                   </div>
                   <Button size="s" variant="ghost" onClick={() => saveItem({ ...item, status: "owned", soldAt: null, soldPrice: null })}>
@@ -297,7 +308,7 @@ function Detail({ item }: { item: Item }) {
             <section className="detail-section sell-teaser">
               <div>
                 <h2 className="section-title">Verkaufen</h2>
-                <p className="muted">Foto auf hellem Grund, fertiger Anzeigentext und Preisvorschlag für Vinted.</p>
+                <p className="muted">Foto auf hellem Grund und fertiger Anzeigentext für Vinted.</p>
               </div>
               <Button icon={<Tag size={16} />} onClick={() => setVerkauf(true)}>
                 Verkauf vorbereiten

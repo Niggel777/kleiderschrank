@@ -26,6 +26,13 @@ const IST_DENIM = (i: Item) =>
 
 /** Wie gut passen die Farben dieser Teile zusammen (0–1) und warum. */
 export function harmony(items: Item[]): Harmony {
+  const ohneGuertel = items.filter((i) => i.sub !== "Gürtel");
+  if (ohneGuertel.length >= 2 && ohneGuertel.length < items.length) {
+    const h = harmony(ohneGuertel);
+    const g = items.find((i) => i.sub === "Gürtel")!;
+    const schuh = items.find((i) => i.category === "schuhe");
+    return schuh && passtLeder(g, schuh) ? { score: Math.min(1, h.score + 0.03), label: `${h.label} · Gürtel passt zu den Schuhen` } : h;
+  }
   if (items.length <= 1) return { score: 1, label: "Einzelteil" };
   const prim = items.map(primary);
   const families = new Set(prim.map((p) => p.family));
@@ -92,6 +99,14 @@ export interface Suggestion {
   harmony: Harmony;
 }
 
+const GUERTEL_HOSEN = new Set(["Jeans", "Chino", "Stoffhose", "Anzughose", "Cargohose"]);
+
+/** Gürtel und Schuhe im gleichen Ton (Braun zu Braun, Schwarz zu Schwarz) wirken stimmig. */
+function passtLeder(g: Item, schuh: Item): boolean {
+  const f = (i: Item) => PALETTE_BY_NAME[i.colors[0]?.name ?? ""]?.family;
+  return f(g) === f(schuh) || (f(g) === "braun" && f(schuh) === "beige");
+}
+
 const WARM = new Set(["Pullover", "Strickjacke", "Hoodie", "Sweatshirt", "Mantel", "Daunenjacke", "Stiefel", "Boots", "Schal", "Mütze"]);
 const LUFTIG = new Set(["Shorts", "Sandalen", "Top", "Minikleid"]);
 
@@ -104,7 +119,7 @@ function seasonFromTemp(temp: number | null, fallback: Season): Season {
 
 function passt(item: Item, ctx: OutfitContext, season: Season): boolean {
   if (ctx.lockedIds.includes(item.id)) return true;
-  if (item.status === "sold" || item.status === "selling") return false;
+  if (item.status === "sold" || item.status === "selling" || item.inWaesche) return false;
   if (item.status === "wish" && !ctx.includeWish) return false;
   if (item.seasons.length && !item.seasons.includes(season)) return false;
   if (ctx.temp !== null) {
@@ -163,8 +178,10 @@ export function generateOutfits(
     kleider: byCat("kleider"),
     jacken: byCat("jacken"),
     schuhe: byCat("schuhe"),
-    accessoires: byCat("accessoires"),
+    accessoires: byCat("accessoires").filter((i) => i.sub !== "Gürtel"),
   };
+  const guertel = pool.filter((i) => i.sub === "Gürtel");
+  const lockedGuertel = locked.find((i) => i.sub === "Gürtel");
 
   const frische = (i: Item) => Math.min(1, idleDays(i, statOf(idx, i.id), today) / 45);
   const gewicht = (i: Item) => (ctx.preferIdle ? 0.3 + frische(i) * 3 : 0.6 + frische(i));
@@ -179,6 +196,7 @@ export function generateOutfits(
     const wahl: Item[] = [];
     const nimm = (cat: CategoryKey) => {
       const l = lockedCat.get(cat);
+      if (l && l.sub === "Gürtel" && cat === "accessoires") return;
       if (l) return wahl.push(l);
       if (cats[cat].length) wahl.push(weighted(cats[cat], gewicht, rand));
     };
@@ -192,7 +210,14 @@ export function generateOutfits(
     }
     if (lockedCat.has("jacken") || jackeNoetig(ctx, season, rand)) nimm("jacken");
     nimm("schuhe");
-    if (lockedCat.has("accessoires") || rand() < 0.4) nimm("accessoires");
+    // Gürtel zu Hosen mit Gürtelschlaufen, farblich passend zu den Schuhen
+    const hose = wahl.find((i) => i.category === "unterteile");
+    if (lockedGuertel) wahl.push(lockedGuertel);
+    else if (hose && GUERTEL_HOSEN.has(hose.sub) && guertel.length && rand() < 0.6) {
+      const schuh = wahl.find((i) => i.category === "schuhe");
+      wahl.push(weighted(guertel, (g) => (schuh && passtLeder(g, schuh) ? 3 : 0.6), rand));
+    }
+    if ((lockedCat.has("accessoires") && lockedCat.get("accessoires")!.sub !== "Gürtel") || rand() < 0.35) nimm("accessoires");
     if (wahl.length < 2) continue;
 
     const key = wahl.map((i) => i.id).sort().join("|");

@@ -12,10 +12,14 @@ import "./styles/outfits.css";
 import "./styles/umkleide.css";
 import "./styles/kalender.css";
 import "./styles/mehr.css";
+import "./styles/heute.css";
+import "./styles/swipe.css";
 import { App } from "./App";
 import { installRouter } from "./lib/router";
+import { startSmoothScroll } from "./components/Motion";
 
 installRouter();
+startSmoothScroll();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

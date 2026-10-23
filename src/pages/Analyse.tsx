@@ -5,26 +5,26 @@ import { useMemo, useState } from "react";
 import { GarmentImage, ProductCard } from "../components/Garment";
 import { Button, Empty } from "../components/ui";
 import { PALETTE_BY_NAME } from "../lib/colors";
-import { addDays, euro, isoDay } from "../lib/dates";
-import { CATEGORIES, displayName, type Item } from "../lib/model";
+import { addDays, isoDay } from "../lib/dates";
+import { CATEGORIES, displayName } from "../lib/model";
 import { go } from "../lib/router";
-import { costPerWear, idleDays, statOf } from "../lib/stats";
+import { idleDays, kombiPartner, statOf } from "../lib/stats";
 import { useGarderobe } from "../lib/store";
+import { CountUp } from "../components/Motion";
 
 const rein = { initial: { opacity: 0, y: 16 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-40px" }, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } } as const;
 
 export function Analyse() {
-  const { schrank, items, idx, wears } = useGarderobe();
+  const { schrank, items, idx, wears, outfits } = useGarderobe();
   const [hover, setHover] = useState<string | null>(null);
   const heute = isoDay();
 
   const k = useMemo(() => {
-    const wert = schrank.reduce((s, i) => s + (i.price ?? 0), 0);
+    const seit30 = addDays(heute, -30);
+    const tage30 = new Set(wears.filter((w) => w.date >= seit30).map((w) => w.date)).size;
     const seit90 = addDays(heute, -90);
     const getragen90 = new Set(wears.filter((w) => w.date >= seit90).flatMap((w) => w.itemIds));
     const quote = schrank.length ? schrank.filter((i) => getragen90.has(i.id)).length / schrank.length : 0;
-    const cpws = schrank.map((i) => costPerWear(i, statOf(idx, i.id))).filter((x): x is number => x !== null);
-    const cpw = cpws.length ? cpws.reduce((a, b) => a + b, 0) / cpws.length : null;
     const schlaefer = schrank
       .filter((i) => i.status === "owned" && idleDays(i, statOf(idx, i.id)) >= 60)
       .sort((a, b) => idleDays(b, statOf(idx, b.id)) - idleDays(a, statOf(idx, a.id)));
@@ -34,18 +34,19 @@ export function Analyse() {
     const kats = CATEGORIES.map((c) => ({ c, n: schrank.filter((i) => i.category === c.key).length })).filter((x) => x.n);
     const verkauft = items.filter((i) => i.status === "sold");
     const imVerkauf = items.filter((i) => i.status === "selling");
-    const besteCpw = schrank
-      .filter((i) => i.price !== null && statOf(idx, i.id).count >= 3)
-      .sort((a, b) => costPerWear(a, statOf(idx, a.id))! - costPerWear(b, statOf(idx, b.id))!)
-      .slice(0, 3);
-    return { wert, quote, cpw, schlaefer, lieblinge, farben: [...farben.entries()].sort((a, b) => b[1] - a[1]), kats, verkauft, imVerkauf, besteCpw, schlaeferWert: schlaefer.reduce((s, i) => s + (i.price ?? 0), 0) };
+    const partner = kombiPartner(wears);
+    const vielseitig = schrank
+      .map((i) => ({ i, n: partner.get(i.id)?.size ?? 0 }))
+      .filter((x) => x.n > 0)
+      .sort((a, b) => b.n - a.n)
+      .slice(0, 4);
+    return { tage30, quote, schlaefer, lieblinge, farben: [...farben.entries()].sort((a, b) => b[1] - a[1]), kats, verkauft, imVerkauf, vielseitig };
   }, [schrank, items, idx, wears, heute]);
 
   if (!schrank.length) return <div className="wrap"><Empty title={<>Noch nichts zu <em>analysieren</em></>} text="Sobald Teile im Schrank sind und du einträgst, was du trägst, erscheinen hier deine Muster." /></div>;
 
   const maxLieb = Math.max(1, ...k.lieblinge.map((i) => statOf(idx, i.id).count));
   const maxKat = Math.max(1, ...k.kats.map((x) => x.n));
-  const erloes = k.verkauft.reduce((s, i) => s + (i.soldPrice ?? 0), 0);
 
   return (
     <div className="wrap analyse">
@@ -57,10 +58,10 @@ export function Analyse() {
       </header>
 
       <motion.section className="hero-kpis" {...rein}>
-        <Kpi wert={String(schrank.length)} label="Teile im Schrank" />
-        <Kpi wert={euro(k.wert)} label="Schrankwert" />
-        <Kpi wert={`${Math.round(k.quote * 100)} %`} label="in 90 Tagen getragen" hint={`${Math.round((1 - k.quote) * schrank.length)} Teile hängen nur`} />
-        <Kpi wert={k.cpw !== null ? euro(k.cpw, 2) : "–"} label="Ø Kosten pro Tragen" />
+        <Kpi wert={<CountUp wert={schrank.length} />} label="Teile im Schrank" />
+        <Kpi wert={<CountUp wert={k.tage30} />} label="Tage in 30 Tagen erfasst" />
+        <Kpi wert={<CountUp wert={Math.round(k.quote * 100)} suffix=" %" />} label="in 90 Tagen getragen" hint={`${Math.round((1 - k.quote) * schrank.length)} Teile hängen nur`} />
+        <Kpi wert={<CountUp wert={outfits.length} />} label="Outfits gespeichert" />
       </motion.section>
 
       {k.schlaefer.length > 0 && (
@@ -68,7 +69,7 @@ export function Analyse() {
           <div className="section-head">
             <div>
               <h2 className="section-title">Schrankhüter</h2>
-              <p className="muted section-sub">{k.schlaefer.length} Teile seit über zwei Monaten nicht getragen · zusammen {euro(k.schlaeferWert)}</p>
+              <p className="muted section-sub">{k.schlaefer.length} Teile seit über zwei Monaten nicht getragen</p>
             </div>
             <a className="link" href="#/schrank?schlaefer=1">Alle ansehen</a>
           </div>
@@ -159,22 +160,22 @@ export function Analyse() {
         </motion.section>
 
         <motion.section className="panel" {...rein}>
-          <h2 className="section-title">Kosten pro Tragen</h2>
-          <p className="muted section-sub">Deine besten Käufe (mind. 3× getragen)</p>
-          {k.besteCpw.length ? (
+          <h2 className="section-title">Vielseitig</h2>
+          <p className="muted section-sub">Mit den meisten verschiedenen Teilen kombiniert</p>
+          {k.vielseitig.length ? (
             <ul className="piece-list">
-              {k.besteCpw.map((i: Item) => (
+              {k.vielseitig.map(({ i, n }) => (
                 <li key={i.id}>
                   <a href={`#/teil/${i.id}`} className="piece">
                     <span className="piece-thumb"><GarmentImage item={i} /></span>
-                    <span className="piece-text"><strong>{displayName(i)}</strong><span>{euro(i.price)} · {statOf(idx, i.id).count}× getragen</span></span>
-                    <span className="cpw tabular">{euro(costPerWear(i, statOf(idx, i.id)), 2)}</span>
+                    <span className="piece-text"><strong>{displayName(i)}</strong><span>{statOf(idx, i.id).count}× getragen</span></span>
+                    <span className="cpw tabular">{n} Partner</span>
                   </a>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="muted">Trag Preise ein und erfasse, was du trägst – dann siehst du hier, welche Käufe sich lohnen.</p>
+            <p className="muted">Trag ein, was du anhast – dann siehst du hier deine Allrounder.</p>
           )}
         </motion.section>
 
@@ -183,7 +184,6 @@ export function Analyse() {
           <div className="sell-stats">
             <div><span className="stat-big tabular">{k.imVerkauf.length}</span><span>im Verkauf</span></div>
             <div><span className="stat-big tabular">{k.verkauft.length}</span><span>verkauft</span></div>
-            <div><span className="stat-big tabular">{euro(erloes)}</span><span>Erlös</span></div>
           </div>
           <Button icon={<Tag size={16} />} onClick={() => go("schrank?bereich=verkauf")}>Verkaufsliste öffnen</Button>
         </motion.section>
@@ -192,7 +192,7 @@ export function Analyse() {
   );
 }
 
-function Kpi({ wert, label, hint }: { wert: string; label: string; hint?: string }) {
+function Kpi({ wert, label, hint }: { wert: React.ReactNode; label: string; hint?: string }) {
   return (
     <div className="hero-kpi">
       <span className="hero-kpi-v tabular">{wert}</span>

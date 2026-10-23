@@ -148,3 +148,21 @@ describe("Stil", () => {
     expect(stilEinheit([sakko, hose, runner])).toBeLessThan(0.5);
   });
 });
+
+describe("Gürtel", () => {
+  it("kommt zu Jeans und passt farblich zu den Schuhen", () => {
+    const schrank: Item[] = [
+      teil({ farbe: "Weiß", category: "oberteile", sub: "T-Shirt" }),
+      teil({ farbe: "Denim", category: "unterteile", sub: "Jeans" }),
+      teil({ farbe: "Braun", category: "schuhe", sub: "Boots" }),
+      teil({ farbe: "Braun", category: "accessoires", sub: "Gürtel" }),
+      teil({ farbe: "Schwarz", category: "accessoires", sub: "Gürtel" }),
+    ];
+    const v = generateOutfits(schrank, wearIndex([]), { occasion: null, temp: 20, lockedIds: [], preferIdle: false, includeWish: false }, 6, seeded(4));
+    const mitGuertel = v.filter((s) => s.items.some((i) => i.sub === "Gürtel"));
+    expect(mitGuertel.length).toBeGreaterThan(0);
+    for (const s of v) expect(s.items.filter((i) => i.sub === "Gürtel").length).toBeLessThanOrEqual(1);
+    const braun = mitGuertel.find((s) => s.items.some((i) => i.sub === "Gürtel" && i.colors[0].name === "Braun"));
+    expect(braun?.harmony.label).toContain("Gürtel passt zu den Schuhen");
+  });
+});

@@ -1,8 +1,11 @@
 // Outfits: Vorschläge aus dem eigenen Schrank, gespeicherte Outfits, selbst zusammenstellen.
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, CloudSun, Heart, Lock, LockOpen, PersonStanding, Plus, Shuffle, Sparkles, Trash2, X } from "lucide-react";
+import { Check, CloudSun, Heart, Lock, LockOpen, PersonStanding, Plus, Share2, Shuffle, Sparkles, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Collage } from "../components/Collage";
+import { Swipe } from "../components/Swipe";
+import { Reise } from "../components/Reise";
+import { teileOutfit } from "../lib/teilen";
 import { GarmentImage } from "../components/Garment";
 import { OrtSheet } from "../components/OrtSheet";
 import { Overlay } from "../components/Overlay";
@@ -17,11 +20,15 @@ import { back, go } from "../lib/router";
 import { useGarderobe, useImageUrl } from "../lib/store";
 import { wetterText, useWetter } from "../lib/wetter";
 
-type Tab = "vorschlaege" | "gespeichert";
+type Tab = "vorschlaege" | "swipe" | "gespeichert" | "reise";
 
 export function Outfits({ q }: { q: URLSearchParams }) {
   const { outfits } = useGarderobe();
-  const [tab, setTab] = useState<Tab>(q.get("tab") === "gespeichert" ? "gespeichert" : "vorschlaege");
+  const [tab, setTab] = useState<Tab>((["swipe", "gespeichert", "reise"].includes(q.get("tab") ?? "") ? q.get("tab") : "vorschlaege") as Tab);
+  useEffect(() => {
+    const t = q.get("tab");
+    if (t && ["vorschlaege", "swipe", "gespeichert", "reise"].includes(t)) setTab(t as Tab);
+  }, [q]);
   return (
     <div className="wrap">
       <header className="shop-head">
@@ -37,15 +44,18 @@ export function Outfits({ q }: { q: URLSearchParams }) {
           onChange={setTab}
           options={[
             { value: "vorschlaege", label: "Vorschläge" },
-            { value: "gespeichert", label: `Gespeichert` },
+            { value: "swipe", label: "Swipe" },
+            { value: "gespeichert", label: "Gespeichert" },
+            { value: "reise", label: "Reise" },
           ]}
         />
       </header>
-      <AnimatePresence mode="wait">
-        <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.3 }}>
-          {tab === "vorschlaege" ? <Vorschlaege lockParam={q.get("lock")} wunsch={q.get("wunsch") === "1"} /> : <Gespeichert />}
-        </motion.div>
-      </AnimatePresence>
+      <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
+          {tab === "vorschlaege" && <Vorschlaege lockParam={q.get("lock")} wunsch={q.get("wunsch") === "1"} />}
+          {tab === "swipe" && <Swipe />}
+          {tab === "gespeichert" && <Gespeichert />}
+          {tab === "reise" && <Reise />}
+      </motion.div>
     </div>
   );
 }
@@ -195,6 +205,7 @@ function Vorschlaege({ lockParam, wunsch }: { lockParam: string | null; wunsch: 
                   <Button icon={<Heart size={16} />} onClick={() => speichern(s)}>Speichern</Button>
                   <Button icon={<Check size={16} />} onClick={() => tragen(s)} disabled={s.items.some((i) => i.status === "wish")}>Heute tragen</Button>
                   <Button icon={<PersonStanding size={16} />} onClick={() => go(`umkleide?ids=${s.items.map((i) => i.id).join(",")}`)}>Anprobieren</Button>
+                  <Button icon={<Share2 size={16} />} onClick={async () => toast((await teileOutfit(s.items, autoName(s.items, anlass), s.harmony.label)) === "geteilt" ? "Geteilt" : "Story-Bild gespeichert")}>Teilen</Button>
                 </div>
               </div>
             </div>
@@ -408,6 +419,9 @@ export function OutfitDetail({ id }: { id: string }) {
             </Button>
             <Button size="l" icon={<Sparkles size={18} />} onClick={() => go(`outfits?lock=${teile[0]?.id ?? ""}`)}>
               Variieren
+            </Button>
+            <Button size="l" icon={<Share2 size={18} />} onClick={async () => toast((await teileOutfit(teile, o.name, h.label)) === "geteilt" ? "Geteilt" : "Story-Bild gespeichert")}>
+              Teilen
             </Button>
           </div>
           <section className="detail-section">

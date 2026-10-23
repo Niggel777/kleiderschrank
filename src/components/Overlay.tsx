@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { back } from "../lib/router";
+import { pauseSmoothScroll } from "./Motion";
 
 export function Overlay({
   children,
@@ -23,7 +24,9 @@ export function Overlay({
     };
     window.addEventListener("keydown", onKey);
     document.documentElement.classList.add("has-overlay");
+    pauseSmoothScroll(true);
     return () => {
+      pauseSmoothScroll(false);
       window.removeEventListener("keydown", onKey);
       document.documentElement.classList.remove("has-overlay");
     };
@@ -32,6 +35,7 @@ export function Overlay({
   return (
     <motion.div
       className={`overlay ${className}`}
+      data-lenis-prevent
       role="dialog"
       aria-modal="true"
       initial={{ opacity: 0 }}

@@ -2,6 +2,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useState } from "react";
 import { db } from "./db";
+import { addDays } from "./dates";
 
 export interface Ort {
   name: string;
@@ -78,4 +79,21 @@ export function useWetter(): { ort: Ort | null; wetter: Wetter | null; fehler: b
     };
   }, [ort?.lat, ort?.lon]); // eslint-disable-line react-hooks/exhaustive-deps
   return { ort, wetter, fehler };
+}
+
+/** Tagesvorhersage (bis 16 Tage im Voraus); Tage außerhalb liefern null. */
+export async function ladeVorhersage(ort: Ort, start: string, tage: number): Promise<(Wetter | null)[]> {
+  const r = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${ort.lat}&longitude=${ort.lon}&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=16&timezone=auto`,
+  );
+  const j = await r.json();
+  const tageListe: string[] = j.daily?.time ?? [];
+  return Array.from({ length: tage }, (_, i) => {
+    const iso = addDays(start, i);
+    const k = tageListe.indexOf(iso);
+    if (k < 0) return null;
+    const max = Math.round(j.daily.temperature_2m_max[k]);
+    const min = Math.round(j.daily.temperature_2m_min[k]);
+    return { temp: Math.round((max + min) / 2), max, min, code: j.daily.weather_code[k] };
+  });
 }

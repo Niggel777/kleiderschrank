@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useMedia } from "../lib/hooks";
+import { pauseSmoothScroll } from "./Motion";
 
 export function Sheet({
   open,
@@ -30,10 +31,12 @@ export function Sheet({
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    pauseSmoothScroll(true);
     setTimeout(() => panel.current?.focus(), 30);
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      if (!document.documentElement.classList.contains("has-overlay")) pauseSmoothScroll(false);
       prev?.focus?.();
     };
   }, [open, onClose]);

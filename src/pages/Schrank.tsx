@@ -6,7 +6,6 @@ import { ProductCard } from "../components/Garment";
 import { Sheet } from "../components/Sheet";
 import { Button, Chip, Empty, Segmented, Swatch, Toggle } from "../components/ui";
 import { PALETTE } from "../lib/colors";
-import { euro } from "../lib/dates";
 import { useLocal } from "../lib/hooks";
 import { CATEGORIES, CATEGORY, OCCASIONS, SEASONS, sizeRank, type CategoryKey, type Item, type Occasion, type Season } from "../lib/model";
 import { go } from "../lib/router";
@@ -25,9 +24,10 @@ interface Filter {
   marken: string[];
   favoriten: boolean;
   schlaefer: boolean;
+  waesche: boolean;
 }
 
-const LEER: Filter = { farben: [], groessen: [], saisons: [], anlaesse: [], marken: [], favoriten: false, schlaefer: false };
+const LEER: Filter = { farben: [], groessen: [], saisons: [], anlaesse: [], marken: [], favoriten: false, schlaefer: false, waesche: false };
 
 function toggle<T>(list: T[], v: T): T[] {
   return list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
@@ -49,6 +49,7 @@ export function Schrank({ q }: { q: URLSearchParams }) {
     ...LEER,
     farben: q.get("farbe") ? [q.get("farbe")!] : [],
     schlaefer: q.get("schlaefer") === "1",
+    waesche: q.get("waesche") === "1",
   }));
   const [sort, setSort] = useLocal<SortKey>("garderobe.sort", "neu");
   const [filterOffen, setFilterOffen] = useState(false);
@@ -74,6 +75,7 @@ export function Schrank({ q }: { q: URLSearchParams }) {
       if (filter.marken.length && !filter.marken.includes(i.brand)) return false;
       if (filter.favoriten && !i.favorite) return false;
       if (filter.schlaefer && idleDays(i, statOf(idx, i.id)) < 60) return false;
+      if (filter.waesche && !i.inWaesche) return false;
       return true;
     });
   }, [imBereich, suche, filter, idx]);
@@ -90,9 +92,8 @@ export function Schrank({ q }: { q: URLSearchParams }) {
   }, [vorKategorie]);
 
   const aktiveFilter =
-    filter.farben.length + filter.groessen.length + filter.saisons.length + filter.anlaesse.length + filter.marken.length + (filter.favoriten ? 1 : 0) + (filter.schlaefer ? 1 : 0);
+    filter.farben.length + filter.groessen.length + filter.saisons.length + filter.anlaesse.length + filter.marken.length + (filter.favoriten ? 1 : 0) + (filter.schlaefer ? 1 : 0) + (filter.waesche ? 1 : 0);
 
-  const wert = imBereich.reduce((s, i) => s + (i.price ?? 0), 0);
 
   if (bereit && items.length === 0) {
     return (
@@ -143,7 +144,7 @@ export function Schrank({ q }: { q: URLSearchParams }) {
       <header className="shop-head">
         <div>
           <div className="eyebrow tabular">
-            {imBereich.length} Teile{wert > 0 && bereich !== "wunsch" && <> · Wert {euro(wert)}</>}
+            {imBereich.length} {imBereich.length === 1 ? "Teil" : "Teile"}
           </div>
           <h1 className="display page-title">
             {bereich === "schrank" ? (
@@ -245,6 +246,11 @@ export function Schrank({ q }: { q: URLSearchParams }) {
               {filter.favoriten && (
                 <button className="pill" onClick={() => setFilter({ ...filter, favoriten: false })}>
                   Favoriten <X size={12} />
+                </button>
+              )}
+              {filter.waesche && (
+                <button className="pill" onClick={() => setFilter({ ...filter, waesche: false })}>
+                  In der Wäsche <X size={12} />
                 </button>
               )}
               {filter.schlaefer && (
@@ -370,6 +376,7 @@ export function Schrank({ q }: { q: URLSearchParams }) {
         <section className="filter-section">
           <Toggle on={filter.favoriten} onChange={(v) => setFilter({ ...filter, favoriten: v })} label="Nur Favoriten" />
           <Toggle on={filter.schlaefer} onChange={(v) => setFilter({ ...filter, schlaefer: v })} label="Seit über 2 Monaten nicht getragen" />
+          <Toggle on={filter.waesche} onChange={(v) => setFilter({ ...filter, waesche: v })} label="Nur Teile in der Wäsche" />
         </section>
       </Sheet>
 

@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { CategoryKey, Item } from "../lib/model";
 import { GarmentImage } from "./Garment";
 
-interface Box {
+export interface Box {
   x: number;
   y: number;
   w: number;
@@ -36,12 +36,17 @@ const KLEID_SCHUHE: Partial<Record<CategoryKey, Box>> = {
   accessoires: { x: 70, y: 8, w: 26, h: 24, z: 3, r: 6 },
 };
 
-function layout(items: Item[]): { item: Item; box: Box }[] {
+export function layout(items: Item[]): { item: Item; box: Box }[] {
   const hatJacke = items.some((i) => i.category === "jacken");
   const hatKleid = items.some((i) => i.category === "kleider");
   const slots: Slots = hatJacke ? MIT_JACKE : hatKleid ? { ...OHNE_JACKE, ...KLEID_SCHUHE } : OHNE_JACKE;
   const genutzt = new Set<CategoryKey>();
+  const hose = slots.unterteile;
   return items.map((item, n) => {
+    if (item.sub === "Gürtel" && hose) {
+      // quer über den Hosenbund
+      return { item, box: { x: hose.x + hose.w * 0.04, y: hose.y - hose.h * 0.03, w: hose.w * 0.92, h: hose.h * 0.13, z: hose.z + 1, r: hose.r - 2 } };
+    }
     const box = !genutzt.has(item.category) ? slots[item.category] : undefined;
     genutzt.add(item.category);
     // Zweites Teil derselben Kategorie: leicht versetzt

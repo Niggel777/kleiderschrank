@@ -169,6 +169,8 @@ export interface Item {
   soldPrice: number | null;
   soldAt: string | null;
   favorite: boolean;
+  /** liegt gerade in der Wäsche (wird nicht vorgeschlagen) */
+  inWaesche?: boolean;
   imageOriginal: string | null;
   imageCutout: string | null;
   imageThumb: string | null;

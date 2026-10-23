@@ -322,11 +322,6 @@ export function TeilNeu({ q, editId }: { q: URLSearchParams; editId?: string }) 
               </section>
 
               <div className="two-col">
-                <Field label={item.status === "wish" ? "Preis im Shop" : "Kaufpreis"}>
-                  <div className="input-euro">
-                    <input type="number" inputMode="decimal" min={0} step="0.01" value={item.price ?? ""} onChange={(e) => set({ price: e.target.value === "" ? null : Number(e.target.value) })} />
-                  </div>
-                </Field>
                 {item.status === "wish" ? (
                   <Field label="Link zum Shop">
                     <input type="url" placeholder="https://" value={item.shopUrl} onChange={(e) => set({ shopUrl: e.target.value })} />

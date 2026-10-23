@@ -43,20 +43,25 @@ export function idleDays(item: Item, s: WearStat, today = isoDay()): number {
   return Math.max(0, daysBetween(since, today));
 }
 
-export function costPerWear(item: Item, s: WearStat): number | null {
-  if (item.price === null) return null;
-  return item.price / Math.max(1, s.count);
+/** Mit wie vielen verschiedenen Teilen wurde ein Teil schon kombiniert? */
+export function kombiPartner(wears: Wear[]): Map<string, Set<string>> {
+  const m = new Map<string, Set<string>>();
+  for (const w of wears)
+    for (const a of w.itemIds) {
+      let s = m.get(a);
+      if (!s) m.set(a, (s = new Set()));
+      for (const b of w.itemIds) if (b !== a) s.add(b);
+    }
+  return m;
 }
 
-export type SortKey = "neu" | "lange-nicht" | "meistgetragen" | "selten" | "preis-auf" | "preis-ab" | "groesse" | "farbe" | "name";
+export type SortKey = "neu" | "lange-nicht" | "meistgetragen" | "selten" | "groesse" | "farbe" | "name";
 
 export const SORT_LABEL: Record<SortKey, string> = {
   neu: "Neu hinzugefügt",
   "lange-nicht": "Lange nicht getragen",
   meistgetragen: "Meistgetragen",
   selten: "Selten getragen",
-  "preis-auf": "Preis aufsteigend",
-  "preis-ab": "Preis absteigend",
   groesse: "Größe",
   farbe: "Farbe",
   name: "Name A–Z",
@@ -76,10 +81,6 @@ export function sortItems(items: Item[], key: SortKey, idx: WearIndex): Item[] {
       return a.sort((x, y) => statOf(idx, y.id).count - statOf(idx, x.id).count);
     case "selten":
       return a.sort((x, y) => statOf(idx, x.id).count - statOf(idx, y.id).count);
-    case "preis-auf":
-      return a.sort((x, y) => (x.price ?? Infinity) - (y.price ?? Infinity));
-    case "preis-ab":
-      return a.sort((x, y) => (y.price ?? -1) - (x.price ?? -1));
     case "groesse":
       return a.sort((x, y) => sizeRank(x.size) - sizeRank(y.size));
     case "farbe":
@@ -89,5 +90,7 @@ export function sortItems(items: Item[], key: SortKey, idx: WearIndex): Item[] {
       );
     case "name":
       return a.sort((x, y) => (x.brand + x.name).localeCompare(y.brand + y.name, "de"));
+    default:
+      return a.sort((x, y) => y.createdAt - x.createdAt);
   }
 }

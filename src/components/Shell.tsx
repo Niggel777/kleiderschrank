@@ -1,10 +1,12 @@
 // Navigation: obere Leiste (Desktop) und Tab-Leiste mit Plus-Knopf (Handy).
 import { motion } from "framer-motion";
-import { BarChart3, CalendarDays, Plus, Settings2, Shirt, Sparkles, PersonStanding } from "lucide-react";
+import { BarChart3, CalendarDays, Home, Plus, Settings2, Shirt, Sparkles, PersonStanding } from "lucide-react";
 import type { ReactNode } from "react";
 import type { BaseName } from "../lib/router";
+import { useScrolled } from "./Motion";
 
 const NAV: { name: BaseName; label: string; icon: ReactNode }[] = [
+  { name: "heute", label: "Heute", icon: <Home size={20} strokeWidth={1.6} /> },
   { name: "schrank", label: "Schrank", icon: <Shirt size={20} strokeWidth={1.6} /> },
   { name: "outfits", label: "Outfits", icon: <Sparkles size={20} strokeWidth={1.6} /> },
   { name: "umkleide", label: "Umkleide", icon: <PersonStanding size={20} strokeWidth={1.6} /> },
@@ -13,10 +15,11 @@ const NAV: { name: BaseName; label: string; icon: ReactNode }[] = [
 ];
 
 export function TopBar({ active }: { active: BaseName }) {
+  const scrolled = useScrolled();
   return (
-    <header className="topbar">
+    <header className={`topbar ${scrolled ? "is-scrolled" : ""}`}>
       <div className="topbar-inner">
-        <a href="#/schrank" className="wordmark display" aria-label="Garderobe – zum Schrank">
+        <a href="#/heute" className="wordmark display" aria-label="Garderobe – Startseite">
           Garderobe
         </a>
         <nav className="topnav" aria-label="Hauptnavigation">
@@ -30,6 +33,9 @@ export function TopBar({ active }: { active: BaseName }) {
           ))}
         </nav>
         <div className="topbar-actions">
+          <a href="#/kalender" className={`icon-btn only-mobile ${active === "kalender" ? "is-on" : ""}`} aria-label="Kalender">
+            <CalendarDays size={19} strokeWidth={1.6} />
+          </a>
           <a href="#/analyse" className={`icon-btn only-mobile ${active === "analyse" ? "is-on" : ""}`} aria-label="Analyse">
             <BarChart3 size={19} strokeWidth={1.6} />
           </a>
@@ -47,7 +53,7 @@ export function TopBar({ active }: { active: BaseName }) {
 }
 
 export function TabBar({ active }: { active: BaseName }) {
-  const tabs = NAV.filter((n) => n.name !== "analyse");
+  const tabs = NAV.filter((n) => n.name !== "analyse" && n.name !== "kalender");
   return (
     <nav className="tabbar" aria-label="Hauptnavigation">
       {tabs.slice(0, 2).map((n) => (

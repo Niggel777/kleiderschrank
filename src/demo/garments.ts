@@ -2,7 +2,7 @@
 
 export type Form =
   | "tshirt" | "longsleeve" | "pullover" | "hoodie" | "hemd" | "hose" | "jeans" | "shorts" | "rock"
-  | "kleid" | "jacke" | "mantel" | "blazer" | "sneaker" | "boots" | "tasche" | "muetze";
+  | "kleid" | "jacke" | "mantel" | "blazer" | "sneaker" | "boots" | "tasche" | "muetze" | "guertel";
 
 interface Shape {
   w: number;
@@ -135,6 +135,16 @@ function shapes(farbe: string): Record<Form, Shape> {
       extra: [
         { d: "M188 222 h24 v18 h-24 z", fill: "#c9b27a" },
         { d: "M96 134 Q200 30 304 134 L292 134 Q200 46 108 134 Z", fill: shade(farbe, -0.2) },
+      ],
+    },
+    guertel: {
+      w: 560, h: 110,
+      body: "M84 30 L540 30 Q556 30 556 46 L556 74 Q556 90 540 90 L84 90 Z",
+      details: "M92 38 L548 38 M92 82 L548 82",
+      extra: [
+        { d: "M18 18 L96 18 Q108 18 108 30 L108 90 Q108 102 96 102 L18 102 Q6 102 6 90 L6 30 Q6 18 18 18 Z M24 34 L24 86 L90 86 L90 34 Z", fill: "#b9b3a6" },
+        { d: "M22 57 L110 57 L110 63 L22 63 Z", fill: "#a39d90" },
+        ...[380, 414, 448, 482].map((x) => ({ d: `M${x} 60 a5 5 0 1 0 0.1 0 z`, fill: shade(farbe, -0.5) })),
       ],
     },
     muetze: {

@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 
 export type Route =
+  | { name: "heute"; q: URLSearchParams }
   | { name: "schrank"; q: URLSearchParams }
   | { name: "teil"; id: string; q: URLSearchParams }
   | { name: "neu"; q: URLSearchParams }
@@ -15,7 +16,7 @@ export type Route =
   | { name: "analyse"; q: URLSearchParams }
   | { name: "mehr"; q: URLSearchParams };
 
-export type BaseName = "schrank" | "outfits" | "umkleide" | "kalender" | "analyse" | "mehr";
+export type BaseName = "heute" | "schrank" | "outfits" | "umkleide" | "kalender" | "analyse" | "mehr";
 
 const EVENT = "routechange";
 
@@ -30,6 +31,8 @@ export function parse(hash: string): Route {
       return b ? { name: "bearbeiten", id: b, q } : { name: "schrank", q };
     case "outfit":
       return b ? { name: "outfit", id: b, q } : { name: "outfits", q };
+    case "schrank":
+      return { name: "schrank", q };
     case "neu":
     case "outfits":
     case "umkleide":
@@ -38,7 +41,7 @@ export function parse(hash: string): Route {
     case "mehr":
       return { name: a, q } as Route;
     default:
-      return { name: "schrank", q };
+      return { name: "heute", q };
   }
 }
 
@@ -63,7 +66,7 @@ let installed = false;
 export function installRouter(): void {
   if (installed) return;
   installed = true;
-  if (!history.state) history.replaceState({ d: 0 }, "", location.hash || "#/schrank");
+  if (!history.state) history.replaceState({ d: 0 }, "", location.hash || "#/heute");
   document.addEventListener("click", (e) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = (e.target as Element | null)?.closest?.('a[href^="#/"]');
@@ -90,5 +93,5 @@ export function useRoute(): Route {
 }
 
 export function isBase(name: Route["name"]): name is BaseName {
-  return ["schrank", "outfits", "umkleide", "kalender", "analyse", "mehr"].includes(name);
+  return ["heute", "schrank", "outfits", "umkleide", "kalender", "analyse", "mehr"].includes(name);
 }

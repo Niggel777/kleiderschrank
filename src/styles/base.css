@@ -1,20 +1,23 @@
 /* ───────── Design-Tokens ───────── */
 :root {
-  --bg: #f6f4f0;
-  --bg-elev: #fbfaf8;
-  --surface: #ffffff;
-  --tile: #ebe8e2;
-  --tile-2: #e2ded6;
-  --ink: #141413;
-  --ink-2: #3b3a37;
-  --muted: #7b776f;
-  --faint: #a8a39a;
-  --line: #e4e0d8;
-  --line-strong: #cfc9bf;
-  --primary: #141413;
-  --primary-ink: #fbfaf8;
-  --rust: #a8502c;
-  --rust-soft: #f3e3d9;
+  --bg: #f3f0ea;
+  --bg-elev: #faf8f4;
+  --surface: #fffdf9;
+  --tile: #e8e3da;
+  --tile-2: #ded8cd;
+  --ink: #16140f;
+  --ink-2: #3a3731;
+  --muted: #7a756b;
+  --faint: #a7a196;
+  --line: #e2ddd3;
+  --line-strong: #cdc6b9;
+  --primary: #16140f;
+  --primary-ink: #faf8f4;
+  --accent: #9e5428;
+  --accent-soft: #f0e0d4;
+  --accent-glow: rgba(158, 84, 40, 0.18);
+  --rust: #9e5428;
+  --rust-soft: #f1e2d7;
   --sage: #4e6b55;
   --sage-soft: #e1e9e1;
   --danger: #b3261e;
@@ -41,21 +44,24 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f0f0e;
-    --bg-elev: #151514;
-    --surface: #1a1a18;
-    --tile: #1d1c1a;
-    --tile-2: #262522;
-    --ink: #efece6;
-    --ink-2: #cdc9c1;
-    --muted: #8f8a81;
-    --faint: #6a665f;
-    --line: #2a2926;
-    --line-strong: #3a3834;
-    --primary: #efece6;
-    --primary-ink: #121211;
-    --rust: #d98a62;
-    --rust-soft: #3a2519;
+    --bg: #0e0d0b;
+    --bg-elev: #151310;
+    --surface: #1a1814;
+    --tile: #1f1c18;
+    --tile-2: #29251f;
+    --ink: #f0ebe2;
+    --ink-2: #cfc8bc;
+    --muted: #918a7e;
+    --faint: #6b655c;
+    --line: #2b2722;
+    --line-strong: #3c372f;
+    --primary: #f0ebe2;
+    --primary-ink: #13110e;
+    --accent: #d88f5f;
+    --accent-soft: #35231a;
+    --accent-glow: rgba(216, 143, 95, 0.18);
+    --rust: #d88f5f;
+    --rust-soft: #35231a;
     --sage: #8fb398;
     --sage-soft: #1f2b22;
     --scrim: rgba(0, 0, 0, 0.55);
@@ -65,21 +71,24 @@
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f0f0e;
-  --bg-elev: #151514;
-  --surface: #1a1a18;
-  --tile: #1d1c1a;
-  --tile-2: #262522;
-  --ink: #efece6;
-  --ink-2: #cdc9c1;
-  --muted: #8f8a81;
-  --faint: #6a665f;
-  --line: #2a2926;
-  --line-strong: #3a3834;
-  --primary: #efece6;
-  --primary-ink: #121211;
-  --rust: #d98a62;
-  --rust-soft: #3a2519;
+  --bg: #0e0d0b;
+  --bg-elev: #151310;
+  --surface: #1a1814;
+  --tile: #1f1c18;
+  --tile-2: #29251f;
+  --ink: #f0ebe2;
+  --ink-2: #cfc8bc;
+  --muted: #918a7e;
+  --faint: #6b655c;
+  --line: #2b2722;
+  --line-strong: #3c372f;
+  --primary: #f0ebe2;
+  --primary-ink: #13110e;
+  --accent: #d88f5f;
+  --accent-soft: #35231a;
+  --accent-glow: rgba(216, 143, 95, 0.18);
+  --rust: #d88f5f;
+  --rust-soft: #35231a;
   --sage: #8fb398;
   --sage-soft: #1f2b22;
   --scrim: rgba(0, 0, 0, 0.55);
@@ -100,6 +109,22 @@
 
 html { -webkit-text-size-adjust: 100%; }
 
+body::before {
+  /* feine Papierkörnung */
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+:root[data-theme="dark"] body::before { mix-blend-mode: screen; opacity: 0.035; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body::before { mix-blend-mode: screen; opacity: 0.035; }
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -119,7 +144,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 button:disabled { cursor: default; }
 a { color: inherit; text-decoration: none; }
-:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
 ::selection { background: var(--ink); color: var(--bg); }
 
 h1, h2, h3, h4 { margin: 0; font-weight: 500; }

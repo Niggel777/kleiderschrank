@@ -1,12 +1,14 @@
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { TabBar, TopBar } from "./components/Shell";
+import { scrollToTop } from "./components/Motion";
 import { ToastProvider } from "./components/Toast";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "./lib/db";
 import { isBase, useRoute, type BaseName, type Route } from "./lib/router";
 import { GarderobeProvider } from "./lib/store";
 import { Schrank } from "./pages/Schrank";
+import { Heute } from "./pages/Heute";
 import { TeilDetail } from "./pages/TeilDetail";
 import { TeilNeu } from "./pages/TeilNeu";
 import { Outfits, OutfitDetail } from "./pages/Outfits";
@@ -26,7 +28,7 @@ function useTheme() {
 
 export function App() {
   const route = useRoute();
-  const [baseRoute, setBaseRoute] = useState<Route>(() => (isBase(route.name) ? route : { name: "schrank", q: new URLSearchParams() }));
+  const [baseRoute, setBaseRoute] = useState<Route>(() => (isBase(route.name) ? route : { name: "heute", q: new URLSearchParams() }));
   const base = baseRoute.name as BaseName;
   const zuletzt = useRef(base);
   useTheme();
@@ -36,7 +38,7 @@ export function App() {
   }, [route]);
 
   useEffect(() => {
-    if (zuletzt.current !== base) window.scrollTo({ top: 0 });
+    if (zuletzt.current !== base) scrollToTop();
     zuletzt.current = base;
   }, [base]);
 
@@ -54,6 +56,7 @@ export function App() {
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             >
+              {base === "heute" && <Heute />}
               {base === "schrank" && <Schrank q={baseRoute.q} />}
               {base === "outfits" && <Outfits q={baseRoute.q} />}
               {base === "umkleide" && <Umkleide q={baseRoute.q} />}

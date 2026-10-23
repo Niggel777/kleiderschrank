@@ -3,7 +3,7 @@ import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from "fflate";
 import { db } from "./db";
 import { isoDay } from "./dates";
 import { CATEGORY, STATUS_LABEL, displayName, type Item, type Outfit, type Setting, type StoredImage, type Wear } from "./model";
-import { costPerWear, statOf, wearIndex } from "./stats";
+import { statOf, wearIndex } from "./stats";
 
 const EXT: Record<string, string> = { "image/webp": "webp", "image/png": "png", "image/jpeg": "jpg" };
 
@@ -48,7 +48,6 @@ export async function obsidianVault(): Promise<Blob> {
         files[`${R}/${bild}`] = [await bytes(img.blob), { level: 0 }];
       }
     }
-    const cpw = costPerWear(i, s);
     const fm = {
       typ: "kleidungsstueck",
       kategorie: CATEGORY[i.category].label,
@@ -56,7 +55,6 @@ export async function obsidianVault(): Promise<Blob> {
       marke: i.brand,
       groesse: i.size,
       farben: i.colors.map((c) => c.name),
-      preis: i.price,
       gekauft: i.purchaseDate,
       saison: i.seasons,
       anlass: i.occasions,
@@ -66,7 +64,6 @@ export async function obsidianVault(): Promise<Blob> {
       favorit: i.favorite,
       getragen: s.count,
       zuletzt_getragen: s.last,
-      kosten_pro_tragen: cpw !== null ? Math.round(cpw * 100) / 100 : null,
     };
     const md = [
       "---",
@@ -123,7 +120,7 @@ export async function obsidianVault(): Promise<Blob> {
       "",
       "## Meistgetragen",
       "```dataview",
-      'TABLE getragen, kosten_pro_tragen FROM "Garderobe/Teile"',
+      'TABLE getragen, zuletzt_getragen FROM "Garderobe/Teile"',
       "SORT getragen DESC",
       "LIMIT 15",
       "```",
