@@ -9,6 +9,7 @@ remote=$(git remote get-url origin)
 cd dist
 rm -rf .git
 git init -q -b gh-pages
+git config core.longpaths true
 git add -A
 git commit -qm "Veröffentlichung $(date '+%Y-%m-%d %H:%M')"
 git push -qf "$remote" gh-pages
