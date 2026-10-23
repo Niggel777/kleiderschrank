@@ -1,6 +1,6 @@
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { TabBar, TopBar } from "./components/Shell";
+import { TabBar, Ticker, TopBar } from "./components/Shell";
 import { scrollToTop } from "./components/Motion";
 import { ToastProvider } from "./components/Toast";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -47,14 +47,13 @@ export function App() {
       <GarderobeProvider>
         <ToastProvider>
           <TopBar active={base} />
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.main
+          <Ticker />
+          <motion.main
               key={base}
               className="page"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             >
               {base === "heute" && <Heute />}
               {base === "schrank" && <Schrank q={baseRoute.q} />}
@@ -64,7 +63,6 @@ export function App() {
               {base === "analyse" && <Analyse />}
               {base === "mehr" && <Mehr />}
             </motion.main>
-          </AnimatePresence>
 
           <AnimatePresence>
             {route.name === "teil" && <TeilDetail key={`teil-${route.id}`} id={route.id} />}

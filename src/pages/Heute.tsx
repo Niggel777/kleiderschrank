@@ -97,7 +97,7 @@ export function Heute() {
         <span className="aurora-c" />
       </div>
       <div className="wrap">
-        <header className="heute-head">
+        <header className="heute-head banner">
           <motion.div className="eyebrow" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
             {formatWeekday(heute)}
           </motion.div>

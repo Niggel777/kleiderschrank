@@ -4,6 +4,8 @@ import { BarChart3, CalendarDays, Home, Plus, Settings2, Shirt, Sparkles, Person
 import type { ReactNode } from "react";
 import type { BaseName } from "../lib/router";
 import { useScrolled } from "./Motion";
+import { useGarderobe } from "../lib/store";
+import { displayName } from "../lib/model";
 import { SyncAnzeige } from "./Konto";
 
 const NAV: { name: BaseName; label: string; icon: ReactNode }[] = [
@@ -51,6 +53,31 @@ export function TopBar({ active }: { active: BaseName }) {
         </div>
       </div>
     </header>
+  );
+}
+
+/** Laufband unter der Kopfleiste – wie im Shop, mit echten Zahlen aus dem Schrank. */
+export function Ticker() {
+  const { schrank, outfits, wears, items } = useGarderobe();
+  const heute = new Date().toISOString().slice(0, 10);
+  const getragen = wears.some((w) => w.date === heute);
+  const neu = [...items].sort((a, b) => b.createdAt - a.createdAt)[0];
+  const texte = [
+    <><b>{schrank.length}</b> Teile im Schrank</>,
+    <><b>{outfits.length}</b> Outfits gespeichert</>,
+    getragen ? <>Heutiger Look <b>eingetragen</b></> : <>Was ziehst du <b>heute</b> an?</>,
+    neu ? <>Neu: <b>{displayName(neu)}</b></> : <>Fotografiere dein <b>erstes Teil</b></>,
+    <>Swipe dich durch <b>neue Outfits</b></>,
+  ];
+  const reihe = [...texte, ...texte];
+  return (
+    <div className="ticker" aria-hidden>
+      <div className="ticker-track">
+        {reihe.map((t, i) => (
+          <span key={i}>{t}</span>
+        ))}
+      </div>
+    </div>
   );
 }
 

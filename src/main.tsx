@@ -14,6 +14,7 @@ import "./styles/kalender.css";
 import "./styles/mehr.css";
 import "./styles/heute.css";
 import "./styles/swipe.css";
+import "./styles/shop.css";
 import { App } from "./App";
 import { installRouter } from "./lib/router";
 import { startSmoothScroll } from "./components/Motion";
